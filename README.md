@@ -7,7 +7,7 @@ Setting up
 cd ui-dev
 yarn install
 yarn run build
-cp -a . ../server/public
+cp -a build/. ../server/public
 ```
 3. Start the server
 ```
