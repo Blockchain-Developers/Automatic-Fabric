@@ -12,5 +12,6 @@ cp -a . ../server/public
 3. Start the server
 ```
 cd ../server
+yarn install
 yarn start
 ```
