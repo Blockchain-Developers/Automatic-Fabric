@@ -1,0 +1,14 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
+  title UI
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+.container.text-center(style='width: 30%;padding: 0px;margin-top: 16%;')
+  form.text-center(method='post' action='/create' enctype='application/json')
+    h2 Number of Orgs
+    input.form-control.form-control-lg(name='orgcount' type='number' min='1' style='width: 80%;margin-right: 10%;margin-left: 10%;')
+    button.btn.btn-light.btn-lg(type='submit' style='margin-top: 5px;') Next
+script(src='assets/js/jquery.min.js')
+script(src='assets/bootstrap/js/bootstrap.min.js')

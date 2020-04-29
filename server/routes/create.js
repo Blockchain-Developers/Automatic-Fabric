@@ -7,6 +7,20 @@ const fs = require('fs');
 const fsExtra = require('fs-extra')
 const YAML = require('json-to-pretty-yaml');
 const insertLine = require('insert-line')
+const session = require('express-session');
+
+router.use(session(
+{
+	secret: 'sEreteerfUU343kkkdfjjdf',
+	name: 'data',
+	resave: true,
+	saveUninitialized: true,
+	cookie:
+	{
+		maxAge: 1000 * 60 * 60
+	},
+	rolling: true,
+}));
 
 var cleardownload = new CronJob('0 */10 * * * *', function() {
   fsExtra.emptyDir('public/download')
@@ -695,7 +709,7 @@ function configtxyamlgen(data) {
 //░░░░░░░░░░░░    ██║░░░░░██║░░██║██████╦╝██║░░██║██║╚█████╔╝    ░░░░░░░░░░░░
 //░░░░░░░░░░░░    ╚═╝░░░░░╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝╚═╝░╚════╝░    ░░░░░░░░░░░░
 
-router.post('/', async function(req, res) {
+router.post('/finalize', async function(req, res) {
   const data=req.body;
   cryptoyaml=await cryptoyamlgen(data);
   dckryaml=await dckryamlgen(data);
@@ -720,5 +734,100 @@ router.post('/', async function(req, res) {
       res.json({path:'/download/'+'config-'+rndname+'.zip'});
     });
   });
+});
+router.get('/', function(req, res, next) {
+	res.render('numoforgs')
+});
+router.post('/', function(req, res, next){
+	req.session.data={};
+	req.session.data.org=[];
+	req.session.data.orgcount=req.body.orgcount;
+	res.redirect('/create/setorg/0')
+});
+router.get('/setorg/finished', function(req, res, next){
+	res.render('setorgfinished', {data:req.session.data})
+});
+router.get('/setorg/:id', function(req, res, next){
+	var id=req.params.id;
+	var finished=true;
+	for(var i=0;i<req.session.data.orgcount;i++){
+		if(!req.session.data.org[i]){
+			finished=false;
+			break;
+		}
+	}
+	if(req.session.data.org[id]){
+		res.render('setorg', {data:req.session.data, id:id, orgname:req.session.data.org[id].name, peercount:req.session.data.org[id].peercount, ordererport:req.session.data.org[id].orderer.port, caport:req.session.data.org[id].ca.port, finished:finished})
+	}
+	else{
+		res.render('setorg', {data:req.session.data, id:id, finished:finished})
+	}
+});
+router.post('/setorg/:id', function(req, res, next){
+	var id=req.params.id;
+	req.session.data.org[id]={};
+	req.session.data.org[id].name=req.body.orgname;
+	req.session.data.org[id].peercount=req.body.peercount;
+	req.session.data.org[id].orderer={};
+	req.session.data.org[id].orderer.port=req.body.ordererport;
+	req.session.data.org[id].ca={};
+	req.session.data.org[id].ca.port=req.body.caport;
+	req.session.data.org[id].peer=[];
+	if(id==req.session.data.orgcount-1){
+		res.redirect('/create/setorg/finished')
+	}
+	else{
+		id=id*1+1;
+		res.redirect('/create/setorg/'+id)
+	}
+
+});
+router.post('/setpeer/initialize', function(req, res, next){
+	res.redirect('/create/setpeer/0')
+
+});
+
+router.get('/setpeer/finished', async function(req, res, next){
+	console.log("flag")
+	var datastring= await JSON.stringify(req.session.data)
+	res.render('setpeerfinished', {data: req.session.data, datastring:datastring})
+});
+router.get('/setpeer/:id', function(req, res, next){
+	var id=req.params.id;
+	var finished=true;
+	for(var i=0;i<req.session.data.orgcount;i++){
+		if(req.session.data.org[i].peer.length!=req.session.data.org[i].peercount){
+			finished=false;
+			break;
+		}
+	}
+	if(!req.session.data.org[id].peer.length){
+		for(var i=0;i<req.session.data.org[id].peercount;i++){
+			req.session.data.org[id].peer[i]={};
+		}
+	}
+	if(req.session.data.org[id]){
+		res.render('setpeer', {data:req.session.data, id:id, finished:finished})
+	}
+	else{
+		res.render('setpeer', {data:req.session.data, id:id, finished:finished})
+	}
+});
+
+router.post('/setpeer/:id', function(req, res, next){
+	var id=req.params.id;
+	for(var i=0;i<req.session.data.org[id].peercount;i++){
+		req.session.data.org[id].peer[i].name=eval('req.body.peer'+i+'name');
+		req.session.data.org[id].peer[i].port=eval('req.body.peer'+i+'port');
+	}
+
+	if(id==req.session.data.orgcount-1){
+		res.redirect('/create/setpeer/finished')
+	}
+	else{
+		id=id*1+1;
+		res.redirect('/create/setpeer/'+id)
+	}
+
 });
 module.exports = router;
