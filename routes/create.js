@@ -129,11 +129,11 @@ function dckryamlgen(data){
     }
   }
   var ca_num = 7;
-  for (var i = 0; i < data.cacount; i++) { // CA
+  for (var i = 0; i < data.orgcount; i++) { // CA
     if (i) {
       dckr += ",";
     }
-    dckr += "\"" + data.ca[i].name + "\": {"; // ca_{
+    dckr += "\"" + "ca." + data.org[i].name + ".com" + "\": {"; // ca_{
     dckr += "\"image\": \"hyperledger/fabric-ca:$IMAGE_TAG\",";
     dckr += "\"dns_search\": \".\",";
     dckr += "\"environment\": ["; // environment_[
@@ -142,12 +142,12 @@ function dckryamlgen(data){
     dckr += "\"FABRIC_CA_SERVER_CA_NAME=ca-" + data.org[i].name + "\",";
     dckr += "\"FABRIC_CA_SERVER_TLS_ENABLED=true\",";
     dckr += "\"FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem\",";
-    dckr += "\"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + data.ca[i].name + "_PRIVATE_KEY}\",";
+    dckr += "\"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + "ca." + data.org[i].name + ".com" + "_PRIVATE_KEY}\",";
     dckr += "\"FABRIC_CA_SERVER_PORT=" + (ca_num + i).toString() + "054\"";
     dckr += "],"; // environment_]
     dckr += "\"ports\": [\"" + (ca_num + i).toString() + "054:7054\"],"; // ports
 
-    dckr += "\"command\": \"sh -c 'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + data.ca[i].name + "_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
+    dckr += "\"command\": \"sh -c 'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + "ca." + data.org[i].name + ".com" + "_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
 
     dckr += "\"volumes\": ["; // volumes_[
     dckr += "\"./crypto-config/peerOrganizations/" + data.org[i].name + ".com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca\""
