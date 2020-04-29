@@ -6,9 +6,8 @@ head
   link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
   link(rel='stylesheet' href='/assets/css/styles.css')
 .container.text-center(style='width: 30%;padding: 0px;margin-top: 16%;')
-  form.text-center(method='post' action='/create' enctype='application/json')
-    h2 Control Panel
-    p Welcome Back #{user}
-    a.btn.btn-light(role='button' href='/create') Config Creator
+  h2 Control Panel
+  p Welcome back, #{user}.
+  a.btn.btn-light(role='button' href='/create') Config Creator
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
