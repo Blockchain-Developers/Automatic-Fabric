@@ -710,7 +710,7 @@ function configtxyamlgen(data) {
 //░░░░░░░░░░░░    ╚═╝░░░░░╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝╚═╝░╚════╝░    ░░░░░░░░░░░░
 
 router.post('/finalize', async function(req, res) {
-  const data=req.body;
+  const data=await JSON.parse(req.body.data);
   cryptoyaml=await cryptoyamlgen(data);
   dckryaml=await dckryamlgen(data);
   configtxyaml=await configtxyamlgen(data);
