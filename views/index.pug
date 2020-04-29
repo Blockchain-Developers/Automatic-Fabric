@@ -1,5 +1,14 @@
-extends layout
-
-block content
-  h1= title
-  p #{title} is Still Under Development
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
+  title Automatic Fabric
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+.container.text-center(style='width: 30%;padding: 0px;margin-top: 16%;')
+  form.text-center(method='post' action='/create' enctype='application/json')
+    h2 Control Panel
+    p Welcome Back #{user}
+    a.btn.btn-light(role='button' href='/create') Config Creator
+script(src='assets/js/jquery.min.js')
+script(src='assets/bootstrap/js/bootstrap.min.js')
