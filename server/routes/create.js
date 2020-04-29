@@ -731,7 +731,7 @@ router.post('/finalize', async function(req, res) {
      zip.addLocalFile('files/'+rndname+'.sh');
       zip.writeZip('public/download/'+'config-'+rndname+'.zip');
       //res.type('document');
-      res.json({path:'/download/'+'config-'+rndname+'.zip'});
+      res.redirect('/download/'+'config-'+rndname+'.zip');
     });
   });
 });
@@ -788,7 +788,6 @@ router.post('/setpeer/initialize', function(req, res, next){
 });
 
 router.get('/setpeer/finished', async function(req, res, next){
-	console.log("flag")
 	var datastring= await JSON.stringify(req.session.data)
 	res.render('setpeerfinished', {data: req.session.data, datastring:datastring})
 });
