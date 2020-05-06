@@ -22,10 +22,10 @@ router.use(session(
 	rolling: true,
 }));
 
-var cleardownload = new CronJob('0 */10 * * * *', function() {
-  fsExtra.emptyDir('public/download')
+var cleartemp = new CronJob('0 */10 * * * *', function() {
+  fsExtra.emptyDir('files/temp')
 }, null, true);
-cleardownload.start();
+cleartemp.start();
 
 function cryptoyamlgen(data){
   let crypto;
@@ -726,9 +726,9 @@ router.post('/finalize', async function(req, res) {
     ca_keys+='export testnet_'+data.ca[i].name+'_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
   }
   const rndname=await randomstring.generate(6);
-  fs.copyFile('files/testnet.sh', 'files/'+rndname+'.sh', (err) => {
-    insertLine('files/'+rndname+'.sh').content(ca_keys).at(19).then(function(err) {
-     zip.addLocalFile('files/'+rndname+'.sh');
+  fs.copyFile('files/testnet.sh', 'files/temp'+rndname+'.sh', (err) => {
+    insertLine('files/temp/'+rndname+'.sh').content(ca_keys).at(19).then(function(err) {
+     zip.addLocalFile('files/temp/'+rndname+'.sh');
       zip.writeZip('public/download/'+'config-'+rndname+'.zip');
       //res.type('document');
       res.redirect('/download/'+'config-'+rndname+'.zip');
