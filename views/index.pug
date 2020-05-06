@@ -5,9 +5,21 @@ head
   title Automatic Fabric
   link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
   link(rel='stylesheet' href='/assets/css/styles.css')
-.container.text-center(style='width: 30%;padding: 0px;margin-top: 16%;')
-  h2 Control Panel
+.container.text-center(style='width: 60%;padding: 0px;margin-top: 5%;')
+  h2 Automatic Fabric CP
   p Welcome back, #{user}.
-  a.btn.btn-light(role='button' href='/create' target='_blank') Config Creator
+  .table-responsive.table-borderless
+    table.table.table-sm
+      tbody
+        tr
+          td.text-center(style='width:160px;')
+            if(isadmin)
+              a.btn.btn-light(role='button' href='/admin' target='_blank' style='width:150px;margin-bottom:10px;') Admin CP
+            else
+              a.btn.btn-light(role='button' href='/create' target='_blank' style='width:150px;margin-bottom:10px;') Create New Config
+            a.btn.btn-light(role='button' href='/settings' target='_blank' style='width:150px;margin-bottom:10px;') Settings
+          td.text-center
+        tr
+          td.text-center
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
