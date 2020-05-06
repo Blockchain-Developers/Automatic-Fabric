@@ -723,7 +723,7 @@ router.post('/finalize', async function(req, res) {
 
   var ca_keys='';
   for (var i = 0; i < data.orgcount; i++) {
-    ca_keys+='export testnet_'+data.org[i].caname+'_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
+    ca_keys+='export testnet_ca.'+data.org[i].name+'.com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
   }
   const rndname=await randomstring.generate(6);
   fs.copyFile('files/testnet.sh', 'files/temp/'+rndname+'.sh', (err) => {
