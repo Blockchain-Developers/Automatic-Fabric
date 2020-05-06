@@ -142,7 +142,7 @@ function dckryamlgen(data){
     dckr += "\"FABRIC_CA_SERVER_CA_NAME=ca-" + data.org[i].name + "\",";
     dckr += "\"FABRIC_CA_SERVER_TLS_ENABLED=true\",";
     dckr += "\"FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem\",";
-    dckr += "\"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + "ca." + data.org[i].name + ".com" + "_PRIVATE_KEY}\",";
+    dckr += "\"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_"+"ca_"+data.org[i].name+"_com"+"_PRIVATE_KEY}\",";
     dckr += "\"FABRIC_CA_SERVER_PORT=" + (ca_num + i).toString() + "054\"";
     dckr += "],"; // environment_]
     dckr += "\"ports\": [\"" + (ca_num + i).toString() + "054:7054\"],"; // ports
@@ -723,7 +723,7 @@ router.post('/finalize', async function(req, res) {
 
   var ca_keys='';
   for (var i = 0; i < data.orgcount; i++) {
-    ca_keys+='export testnet_ca.'+data.org[i].name+'.com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
+    ca_keys+='export testnet_ca_'+data.org[i].name+'_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
   }
   const rndname=await randomstring.generate(6);
   fs.copyFile('files/testnet.sh', 'files/temp/'+rndname+'.sh', (err) => {
