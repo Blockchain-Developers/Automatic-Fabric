@@ -111,7 +111,7 @@ function dckryamlgen(data){
       dckr += "\"CORE_PEER_CHAINCODEADDRESS=" + data.org[i].peer[j].name + "." + data.org[i].name + ".com:" + (port_num + i).toString() + "052\",";
       dckr += "\"CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:" + (port_num + i).toString() + "052\",";
       dckr += "\"CORE_PEER_GOSSIP_BOOTSTRAP=" + data.org[i].peer[j].name + "." + data.org[i].name + ".com:" + (port_num + i).toString() + "051\",";
-      if (j) {
+      if (!j) {
         dckr += "\"CORE_PEER_GOSSIP_EXTERNALENDPOINT=" + data.org[i].peer[j].name + "." + data.org[i].name + ".com:" + (port_num + i).toString() + "051\",";
       }
       dckr += "\"CORE_PEER_LOCALMSPID=" + data.org[i].name + "MSP\"";
@@ -722,7 +722,7 @@ router.post('/finalize', async function(req, res) {
   zip.addLocalFile("files/node-base.yaml");
 
   var ca_keys='';
-  for (var i = 0; i < data.cacount; i++) {
+  for (var i = 0; i < data.orgcount; i++) {
     ca_keys+='export testnet_'+data.ca[i].name+'_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
   }
   const rndname=await randomstring.generate(6);
