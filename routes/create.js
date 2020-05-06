@@ -147,7 +147,7 @@ function dckryamlgen(data){
     dckr += "],"; // environment_]
     dckr += "\"ports\": [\"" + (ca_num + i).toString() + "054:7054\"],"; // ports
 
-    dckr += "\"command\": \"sh -c 'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_" + "ca." + data.org[i].name + ".com" + "_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
+    dckr += "\"command\": \"sh -c 'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/ca." + data.org[i].name + ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca/${testnet_"+"ca_"+data.org[i].name+"_com"+"_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
 
     dckr += "\"volumes\": ["; // volumes_[
     dckr += "\"./crypto-config/peerOrganizations/" + data.org[i].name + ".com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" + data.org[i].name + ".com/ca\""
