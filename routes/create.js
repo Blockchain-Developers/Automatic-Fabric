@@ -726,7 +726,7 @@ router.post('/finalize', async function(req, res) {
     ca_keys+='export testnet_'+data.ca[i].name+'_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/'+data.org[i].name+'.com/ca && ls *_sk)\n'
   }
   const rndname=await randomstring.generate(6);
-  fs.copyFile('files/testnet.sh', 'files/temp'+rndname+'.sh', (err) => {
+  fs.copyFile('files/testnet.sh', 'files/temp/'+rndname+'.sh', (err) => {
     insertLine('files/temp/'+rndname+'.sh').content(ca_keys).at(19).then(function(err) {
      zip.addLocalFile('files/temp/'+rndname+'.sh');
       zip.writeZip('public/download/'+'config-'+rndname+'.zip');
