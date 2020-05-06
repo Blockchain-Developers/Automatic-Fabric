@@ -5,8 +5,33 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var createRouter = require('./routes/create');
+var session = require('express-session');
+var MySQLStore = require('express-mysql-session')(session);
+const mysql = require('mysql');
+const con = mysql.createConnection({
+  host: 'localhost',
+  user: 'nodejs',
+  password: 'nodejspassword',
+  database: 'users',
+  multipleStatements: true
+});
+
+var sessionStore = new MySQLStore({}, con);
 
 var app = express();
+
+app.use(session(
+{
+        secret: 'asdfasdI0YOYiAxjOtR',
+        resave: true,
+        saveUninitialized: true,
+        store: sessionStore,
+        cookie:
+        {
+                maxAge: 1000 * 60 * 60
+        },
+        rolling: true,
+}));
 
 // view engine setup
 app.use(express.static(path.join(__dirname, 'public')));
@@ -20,7 +45,9 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/create', createRouter);
-
+app.use('/logout', function(req, res, next){
+  req.session.authorized='';
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
