@@ -46,7 +46,9 @@ router.post('/', async function(req, res, next){
       }
       if(!userdata.pending){
         userdata.pending=[];
-        userdata.pending.push(id);
+        userdata.pending.push({});
+        userdata.pending.id=id;
+        userdata.pending.id.filled=0;
       }
       else{
         userdata.pending.push(id);
