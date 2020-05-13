@@ -49,7 +49,8 @@ app.use('/', indexRouter);
 app.use('/create', createRouter);
 app.use('/new', newRouter);
 app.use('/logout', function(req, res, next){
-  req.session.authorized='';
+  delete req.session.authorized;
+  res.redirect('/');
 });
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
