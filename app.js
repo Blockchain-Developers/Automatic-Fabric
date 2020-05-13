@@ -3,8 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var indexRouter = require('./routes/index');
-var createRouter = require('./routes/create');
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 const mysql = require('mysql');
@@ -42,6 +40,10 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+var indexRouter = require('./routes/index');
+var createRouter = require('./routes/create');
+var newRouter = require('./routes/new');
 
 app.use('/', indexRouter);
 app.use('/create', createRouter);
