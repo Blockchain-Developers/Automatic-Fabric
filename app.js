@@ -47,6 +47,7 @@ var newRouter = require('./routes/new');
 
 app.use('/', indexRouter);
 app.use('/create', createRouter);
+app.use('/new', newRouter);
 app.use('/logout', function(req, res, next){
   req.session.authorized='';
 });

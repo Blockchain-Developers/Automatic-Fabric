@@ -13,9 +13,16 @@ const con = mysql.createConnection({
 /* GET home page. */
 
 router.get('/', async function(req, res, next) {
-  res.render('', {user:req.session.user, isadmin:req.session.admin});
+  res.render('new');
 });
 router.post('/', async function(req, res, next){
-
+  var data;
+  data.orgcount=req.body.fields.length;
+  data.org=[];
+  for(var i=0;i<data.orgcount;i++){
+    data.org.push({});
+    data.org[i].name=req.body.fields[i];
+  }
+  
 });
 module.exports = router;
