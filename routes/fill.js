@@ -13,10 +13,26 @@ const con = mysql.createConnection({
 
 /* GET home page. */
 
-router.get('/', async function(req, res, next) {
-  res.render('new', {user:req.session.user});
+router.get('/:id', async function(req, res, next) {
+  con.query('select data from pending where id=?', req.params.id, async function(err, results){
+    var data=await JSON.parse(results.[0].data);
+    var decision=0;
+    for(var i=0;i<data.orgcount;i++){
+      if(data.org[i].name==req.session.user){
+        decision=1;
+      }
+    }
+    if(decision){
+      res.render('fill', {id:req.params.id});
+    }
+    else{
+      res.send('Illegal Request')
+    }
+
+  })
+
 });
-router.post('/', async function(req, res, next){
-  
+router.post('/:id', async function(req, res, next){
+  console.log(req.body);
 });
 module.exports = router;

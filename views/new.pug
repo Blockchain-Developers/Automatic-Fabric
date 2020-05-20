@@ -17,7 +17,7 @@ script.
   currentEntry = $(this).parents('.entry:first'),
   newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
   newEntry.find('input').val('');
-  controlForm.find('.entry:not(:last) .btn-add')
+  newEntry.find('button')
   .removeClass('btn-add').addClass('btn-remove')
   .removeClass('btn-success').addClass('btn-danger')
   .html('-');
