@@ -1,0 +1,13 @@
+users
+-----------------
+username varchar(100)
+passwordhash varchar(100)
+role varchar(100)
+status varchar(100)
+data text
+
+pending
+-----------------
+id varchar(100)
+database text
+created timestamp

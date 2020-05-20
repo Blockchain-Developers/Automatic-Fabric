@@ -1,0 +1,53 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
+  title Automatic Fabric
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+script(src='/assets/js/jquery.min.js')
+script(src='/assets/bootstrap/js/bootstrap.min.js')
+script.
+  $(function() {
+  $(document).on('click', '.btn-add', function(e) {
+  e.preventDefault();
+  var currentEntry = $('.controls .entry:last');
+  var newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
+  newEntry.find('input').val('');
+  }).on('click', '.btn-remove', function(e) {
+  if($('.controls .entry').length!=1){
+    $(this).parents('.entry:first').remove();
+  }
+  e.preventDefault();
+  return false;
+  });
+  });
+div
+  .container(style='width: 80%;height: 60%;')
+    .row
+      .col-md-6(style='max-width: 20%;margin-top: 98px;height: 100%;')
+      .col-md-6(style='max-width: 60%;min-width: 60%;')
+        h1.text-center(style='margin-top: 20px;') Fill Info
+        div(style='text-align:center')
+          form(role='form' autocomplete='off' method='post' enctype='application/json' action='/fill/'+id)
+            table(width='100%')
+              tr
+                td
+                  label.control-label(style='margin-top:10px') Please input orderer port
+                  input.form-control(name='ordererport' type='number' placeholder='Orderer Port' size='3' required='')
+                td
+                  label.control-label(type='numeric' style='margin-top:10px') Please input ca port
+                  input.form-control(name='caport' type='number' placeholder='CA Port' size='3' required='')
+              tr
+            #fields.control-group
+              label.control-label(style='margin-top:20px;margin-bottom:-10px') Please input peer info
+            .controls
+              .entry.input-group.col-xs-3
+                input.form-control(name='fields' type='text' placeholder='Peer Name' size='3' required='' style='margin-top:10px')
+                input.form-control(name='fields' type='number' placeholder='Peer Port' size='3' required='' style='margin-top:10px')
+                span.input-group-btn
+                  button.btn.btn-danger.btn-remove(type='button' style='width:40px;margin-top:10px') -
+              div(style='text-align:center')
+                button.btn.btn-light.btn-add(type='button' style='margin-top:20px;width:100px;margin-right:10px') Add Peer
+                button.btn.btn-light(type='submit' style='margin-top:20px;width:100px') Submit
+    .col-md-6(style='max-width: 20%;margin-top: 80px;height: 100%;')

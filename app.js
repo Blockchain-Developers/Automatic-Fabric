@@ -3,8 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var indexRouter = require('./routes/index');
-var createRouter = require('./routes/create');
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 const mysql = require('mysql');
@@ -43,10 +41,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+var indexRouter = require('./routes/index');
+var newRouter = require('./routes/new');
+var fillRouter = require('./routes/fill');
+var editRouter = require('./routes/edit');
+var confirmRouter = require('./routes/confirm')
+var finalizeRouter = require('./routes/finalize')
+
 app.use('/', indexRouter);
-app.use('/create', createRouter);
+app.use('/new', newRouter);
+app.use('/fill', fillRouter);
+app.use('/edit', editRouter);
+app.use('/confirm', confirmRouter);
+app.use('/finalize', finalizeRouter)
 app.use('/logout', function(req, res, next){
-  req.session.authorized='';
+  delete req.session.authorized;
+  res.redirect('/');
 });
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
