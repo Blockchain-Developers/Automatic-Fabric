@@ -27,24 +27,26 @@ head
                     td.text-left
                       h5 Pending
                   if(data)
-                    each val, index in data.pending
-                      tr
-                        td.text-left(width='50%') #{val.id}
-                        if(val.filled)
-                          td.text-left info filled
-                        else
-                          td.text-left
-                            a(href='/fill/'+val.id) fill info
+                    if(data.pending)
+                      each val, index in data.pending
+                        tr
+                          td.text-left(width='50%') #{val.id}
+                          if(val.filled)
+                            td.text-left info filled
+                          else
+                            td.text-left
+                              a(href='/fill/'+val.id) fill info
                   tr
                     td.text-left
                       h5(style='margin-top:10px') Finished
                       if(data)
-                        each val, index in data.finished
-                          tr
-                            td.text-left(width='50%') #{val.id}
-                            if(val.filled)
-                              td.text-left(style='color:blue') info filled
-                            else
-                              td.text-left(style='color:red') info pending
+                        if(data.finished)
+                          each val, index in data.finished
+                            tr
+                              td.text-left(width='50%') #{val.id}
+                              if(val.filled)
+                                td.text-left(style='color:blue') info filled
+                              else
+                                td.text-left(style='color:red') info pending
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
