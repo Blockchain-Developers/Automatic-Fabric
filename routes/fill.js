@@ -59,6 +59,7 @@ router.post('/:id', async function(req, res, next){
             data.pending[i].filled=1;
           }
         }
+        con.query('update users set data=? where username=?', [JSON.stringify(data), req.session.user])
       });
       res.redirect('/')
     }

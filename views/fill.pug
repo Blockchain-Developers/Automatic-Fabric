@@ -11,13 +11,14 @@ script.
   $(function() {
   $(document).on('click', '.btn-add', function(e) {
   e.preventDefault();
-  var controlForm = $('.controls control-group form:first'),
-  currentEntry = $(this).parents('.entry:first'),
-  newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
+  var currentEntry = $('.controls .entry:last');
+  var newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
   newEntry.find('input').val('');
-  .html('-');
   }).on('click', '.btn-remove', function(e) {
-  $(this).parents('.entry:first').remove();
+  console.log($(this).parents('.entry').length);
+  if($('.controls .entry').length!=1){
+    $(this).parents('.entry:first').remove();
+  }
   e.preventDefault();
   return false;
   });
@@ -48,6 +49,6 @@ div
                 span.input-group-btn
                   button.btn.btn-danger.btn-remove(type='button' style='width:40px;margin-top:10px') -
               div(style='text-align:center')
-                button.btn.btn-success.btn-add(type='submit' style='margin-top:20px;width:100px') Add Peer
+                button.btn.btn-light.btn-add(type='button' style='margin-top:20px;width:100px;margin-right:10px') Add Peer
                 button.btn.btn-light(type='submit' style='margin-top:20px;width:100px') Submit
     .col-md-6(style='max-width: 20%;margin-top: 80px;height: 100%;')
