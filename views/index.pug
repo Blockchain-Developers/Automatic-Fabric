@@ -31,10 +31,13 @@ head
                       each val, index in data.pending
                         tr
                           td.text-left(width='50%') #{val.id}
-                          if(val.filled)
+                          if(val.filled==1)
                             td.text-center
                               a.btn.btn-primary(role='button' href='/edit/'+val.id style='width:90px') Edit Info
                               a.btn.btn-dark(role='button' href='/confirm/'+val.id style='width:90px;margin-left:5px') Confirm
+                          else if(val.filled==2)
+                            td.text-center
+                              a.btn.btn-light(role='button' disabled='') Confirmed
                           else
                             td.text-center
                               a.btn.btn-danger(role='button' href='/fill/'+val.id style='width:90px') Fill Info
