@@ -44,7 +44,7 @@ router.get('/:id', async function(req, res, next) {
         }
       }
       if(check_finalize){
-        axios.post('/finalize', data).catch(function (error) {
+        axios.post('/finalize/'+id, data).catch(function (error) {
           if(!error){
             res.redirect('/');
           }
