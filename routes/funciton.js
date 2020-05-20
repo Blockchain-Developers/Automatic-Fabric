@@ -12,6 +12,7 @@ const session = require('express-session');
 var dkyaml = [];
 var port_num = 7;
 var peer_num = 7;
+var ca_num = 7;
 
 router.use(session(
 {
@@ -121,63 +122,36 @@ function dckryamlgen(data, orgnumber){
 
         dckr += '"ports": ["' + (peer_num ++).toString() + '051:7051"]';
         dckr += '},'; // peer.org.com_}
-      }
+    }
 
-      "org0.peer1.Org0.com": {
-            "container_name": "org0.peer1.Org0.com",
-            "extends": {
-              "file": "node-base.yaml",
-              "service": "peer-base"
-            },
-            "networks": [
-              "testnet"
-            ],
-            "environment": [
-              "CORE_PEER_ID=org0.peer1.Org0.com",
-              "CORE_PEER_ADDRESS=org0.peer1.Org0.com:7051",
-              "CORE_PEER_LISTENADDRESS=0.0.0.0:7051",
-              "CORE_PEER_CHAINCODEADDRESS=org0.peer1.Org0.com:7052",
-              "CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052",
-              "CORE_PEER_GOSSIP_BOOTSTRAP=org0.peer1.Org0.com:7051",
-              "CORE_PEER_GOSSIP_EXTERNALENDPOINT=org0.peer1.Org0.com:7051",
-              "CORE_PEER_LOCALMSPID=Org0MSP"
-            ],
-            "volumes": [
-              "/var/run/:/host/var/run/",
-              "./crypto-config/peerOrganizations/Org0.com/peers/org0.peer1.Org0.com/msp:/etc/hyperledger/fabric/msp",
-              "./crypto-config/peerOrganizations/Org0.com/peers/org0.peer1.Org0.com/tls:/etc/hyperledger/fabric/tls",
-              "org0.peer1.Org0.com:/var/hyperledger/production"
-            ],
-            "ports": [
-              "8051:7051"
-            ]
-          },
-          "ca0": {
-            "image": "hyperledger/fabric-ca:$IMAGE_TAG",
-            "dns_search": ".",
-            "environment": [
-              "GODEBUG=netdns=go",
-              "FABRIC_CA_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca",
-              "FABRIC_CA_SERVER_CA_NAME=ca-Org0",
-              "FABRIC_CA_SERVER_TLS_ENABLED=true",
-              "FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca/ca.Org0.com-cert.pem",
-              "FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca/${testnet_ca0_PRIVATE_KEY}",
-              "FABRIC_CA_SERVER_PORT=7054"
-            ],
-            "ports": [
-              "7054:7054"
-            ],
-            "command": "sh -c 'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca/ca.Org0.com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca/${testnet_ca0_PRIVATE_KEY} -b admin:adminpw -d'",
-            "volumes": [
-              "./crypto-config/peerOrganizations/Org0.com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/Org0.com/ca"
-            ],
-            "container_name": "ca_Org0",
-            "networks": [
-              "testnet"
-            ]
-          }
-        }
-      }';
+    dckr += '"ca.' + data.org[orgnumber].name + '.com": {'; // ca_{
+    dckr += '"image": "hyperledger/fabric-ca:$IMAGE_TAG",';
+    dckr += '"dns_search": ".",';
+    dckr += '"environment": ['; // environment_[
+    dckr += '"GODEBUG=netdns=go",';
+    dckr += '"FABRIC_CA_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca",';
+    dckr += '"FABRIC_CA_SERVER_CA_NAME=ca-' + data.org[orgnumber].name + '",';
+    dckr += '"FABRIC_CA_SERVER_TLS_ENABLED=true",';
+    dckr += '"FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca/ca.' + data.org[orgnumber].name + '.com-cert.pem",';
+    dckr += '"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca/${testnet_ca0_PRIVATE_KEY}",';
+    dckr += '"FABRIC_CA_SERVER_PORT=' + (ca_num + orgnumber).toString() + '054"';
+    dckr += '],'; // environment_]
+
+    dckr += '"ports": ["' + (ca_num + orgnumber).toString() + '054:7054"],'; // ports
+
+    dckr += '"command": "sh -c \'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca/ca.' + data.org[orgnumber].name + '.com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca/${testnet_ca_' + data.org[orgnumber].name + '_com_PRIVATE_KEY} -b admin:adminpw -d\'",'; // command
+
+    dckr += '"volumes": ['; // volumes_[
+    dckr += '"./crypto-config/peerOrganizations/' + data.org[orgnumber].name + '.com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' + data.org[orgnumber].name + '.com/ca"';
+    dckr += '],'; // volumes_]
+
+    dckr += '"container_name": "ca_' + data.org[orgnumber].name + '",'; // container_name
+
+    dckr += '"networks": ["testnet"]'; // networks
+    
+    dckr += '}'; // ca_}
+    dckr += '}'; // services_}
+    dckr += '}'; // HEAD_}
 }
 
 function configtxyamlgen(data) {
@@ -719,7 +693,7 @@ router.post('/finalize', async function(req, res) {
     var zip=new AdmZip();
     zip.addFile("crypto-config.yaml", Buffer.alloc(cryptoyaml.length, cryptoyaml), "");
     for (var i = 0; i < data.orgcount; i++) {
-        zip.addFile("org" + i + "docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
+        zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
         // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
     }
     zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
