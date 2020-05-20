@@ -59,7 +59,7 @@ router.post('/', async function(req, res, next){
   }
   var data_str=await JSON.stringify(data);
   con.query('insert into pending set id=?, data=?', [id, data_str])
-  res.send('success')
+  res.redirect('/')
   }
   else
   {
