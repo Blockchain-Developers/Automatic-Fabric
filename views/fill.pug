@@ -3,10 +3,10 @@ head
   meta(charset='utf-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
   title Automatic Fabric
-  link(rel='stylesheet' href='assets/bootstrap/css/bootstrap.min.css')
-  link(rel='stylesheet' href='assets/css/styles.css')
-script(src='assets/js/jquery.min.js')
-script(src='assets/bootstrap/js/bootstrap.min.js')
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+script(src='/assets/js/jquery.min.js')
+script(src='/assets/bootstrap/js/bootstrap.min.js')
 script.
   $(function() {
   $(document).on('click', '.btn-add', function(e) {
@@ -33,7 +33,7 @@ div
       .col-md-6(style='max-width: 60%;min-width: 60%;')
         h1.text-center(style='margin-top: 20px;') Fill Info
         div(style='text-align:center')
-          form(role='form' autocomplete='off' method='post' enctype='application/json' action='/fill')
+          form(role='form' autocomplete='off' method='post' enctype='application/json' action='/fill/'+id)
             table(width='100%')
               tr
                 td
