@@ -14,7 +14,7 @@ const con = mysql.createConnection({
 /* GET home page. */
 
 router.get('/', async function(req, res, next) {
-  res.render('new');
+  res.render('new', {user:req.session.user});
 });
 router.post('/', async function(req, res, next){
   var str='';
@@ -63,7 +63,7 @@ router.post('/', async function(req, res, next){
   }
   else
   {
-    res.send('non-existence member detected')
+    res.render('new', {user:req.session.user, message:'non-existence member detected'})
   }
   });
 });
