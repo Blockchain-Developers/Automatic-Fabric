@@ -46,12 +46,10 @@ router.post('/', async function(req, res, next){
       }
       if(!userdata.pending){
         userdata.pending=[];
-        userdata.pending.push({});
-        userdata.pending.id=id;
-        userdata.pending.id.filled=0;
+        userdata.pending.push({id:id, filled:0});
       }
       else{
-        userdata.pending.push(id);
+        userdata.pending.push({id:id, filled:0});
       }
       userdata_str=await JSON.stringify(userdata);
       con.query('update users set data=? where username=?', [userdata_str, results[0].username]);

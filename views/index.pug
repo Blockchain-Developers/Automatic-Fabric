@@ -19,19 +19,23 @@ head
               a.btn.btn-light(role='button' href='/new' target='_blank' style='width:150px;margin-bottom:10px;') Create New
             a.btn.btn-light(role='button' href='/settings' style='width:150px;margin-bottom:10px;') Settings
             a.btn.btn-light(role='button' href='/logout' style='width:150px;margin-bottom:10px;') Logout
-          td.text-center
-        tr
           td.text
-            h4 Pending
-        for each val, index in data.pending
-          tr
-            td.text val.id
-            if(val.id.filled)
-              td.text(style='color:blue') info filled
-            else
-              td.text(style='color:red') info pending
-        tr
-          td.text
-            h4 Finished
+            .table-responsive.table-bordered
+              table.table.table-sm
+                tbody
+                  tr
+                    td.text-left
+                      h5 Pending
+                  if(data)
+                    each val, index in data.pending
+                      tr
+                        td.text-left #{val.id}
+                        if(val.filled)
+                          td.text(style='color:blue') info filled
+                        else
+                          td.text(style='color:red') info pending
+                  tr
+                    td.text-left
+                      h5 Finished
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
