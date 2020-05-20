@@ -45,11 +45,13 @@ var indexRouter = require('./routes/index');
 var createRouter = require('./routes/create');
 var newRouter = require('./routes/new');
 var fillRouter = require('./routes/fill');
+var editRouter = require('./routes/edit');
 
 app.use('/', indexRouter);
 app.use('/create', createRouter);
 app.use('/new', newRouter);
 app.use('/fill', fillRouter);
+app.use('/edit', editRouter);
 app.use('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');

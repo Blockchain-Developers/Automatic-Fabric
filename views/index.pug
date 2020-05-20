@@ -33,10 +33,12 @@ head
                           td.text-left(width='50%') #{val.id}
                           if(val.filled)
                             td.text-left
-                              a(href='/fill/'+val.id) edit info
+                              a.btn.btn-primary(role='button' href='/edit/'+val.id) Edit Info
+                            td
+                              a.btn.btn-light(role='button' href='/confirm/'+val.id) Confirm
                           else
                             td.text-left
-                              a(href='/fill/'+val.id style='color:red') fill info
+                              a.btn.btn-danger(role='button' href='/fill/'+val.id) Fill Info
                   tr
                     td.text-left
                       h5(style='margin-top:10px') Finished
