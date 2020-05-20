@@ -16,7 +16,7 @@ head
             if(isadmin)
               a.btn.btn-light(role='button' href='/admin' target='_blank' style='width:150px;margin-bottom:10px;') Admin CP
             else
-              a.btn.btn-light(role='button' href='/new' target='_blank' style='width:150px;margin-bottom:10px;') Create New
+              a.btn.btn-light(role='button' href='/new' style='width:150px;margin-bottom:10px;') Create New
             a.btn.btn-light(role='button' href='/settings' style='width:150px;margin-bottom:10px;') Settings
             a.btn.btn-light(role='button' href='/logout' style='width:150px;margin-bottom:10px;') Logout
           td.text
@@ -29,13 +29,22 @@ head
                   if(data)
                     each val, index in data.pending
                       tr
-                        td.text-left #{val.id}
+                        td.text-left(width='50%') #{val.id}
                         if(val.filled)
-                          td.text(style='color:blue') info filled
+                          td.text-left info filled
                         else
-                          td.text(style='color:red') info pending
+                          td.text-left
+                            a(href='/fill/'+val.id) fill info
                   tr
                     td.text-left
-                      h5 Finished
+                      h5(style='margin-top:10px') Finished
+                      if(data)
+                        each val, index in data.finished
+                          tr
+                            td.text-left(width='50%') #{val.id}
+                            if(val.filled)
+                              td.text-left(style='color:blue') info filled
+                            else
+                              td.text-left(style='color:red') info pending
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
