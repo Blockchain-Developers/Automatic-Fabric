@@ -42,7 +42,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 var indexRouter = require('./routes/index');
-var createRouter = require('./routes/create');
 var newRouter = require('./routes/new');
 var fillRouter = require('./routes/fill');
 var editRouter = require('./routes/edit');
@@ -50,7 +49,6 @@ var confirmRouter = require('./routes/confirm')
 var finalizeRouter = require('./routes/finalize')
 
 app.use('/', indexRouter);
-app.use('/create', createRouter);
 app.use('/new', newRouter);
 app.use('/fill', fillRouter);
 app.use('/edit', editRouter);
