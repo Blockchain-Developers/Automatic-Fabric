@@ -24,7 +24,7 @@ router.get('/:id', async function(req, res, next) {
       }
     }
     if(decision){
-      res.render('fill', {orginfo:data.org[orgnum],id:req.params.id});
+      res.render('edit', {orginfo:data.org[orgnum],id:req.params.id});
     }
     else{
       res.send('Illegal Request')

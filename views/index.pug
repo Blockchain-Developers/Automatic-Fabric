@@ -32,13 +32,12 @@ head
                         tr
                           td.text-left(width='50%') #{val.id}
                           if(val.filled)
-                            td.text-left
-                              a.btn.btn-primary(role='button' href='/edit/'+val.id) Edit Info
-                            td
-                              a.btn.btn-light(role='button' href='/confirm/'+val.id) Confirm
+                            td.text-center
+                              a.btn.btn-primary(role='button' href='/edit/'+val.id style='width:90px') Edit Info
+                              a.btn.btn-dark(role='button' href='/confirm/'+val.id style='width:90px;margin-left:5px') Confirm
                           else
-                            td.text-left
-                              a.btn.btn-danger(role='button' href='/fill/'+val.id) Fill Info
+                            td.text-center
+                              a.btn.btn-danger(role='button' href='/fill/'+val.id style='width:90px') Fill Info
                   tr
                     td.text-left
                       h5(style='margin-top:10px') Finished
