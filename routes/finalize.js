@@ -723,7 +723,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 				});
 
 				for(var i=0;i<data.orgcount;i++){
-					con.query('select data from users where username=?', data.org[i].name, async function(err, results){
+					con.query('select username, data from users where username=?', data.org[i].name, async function(err, results){
 						var it=0;
 						var userdata=JSON.parse(results[0].data);
 						for(var i=0;i<userdata.pending.length;i++){
@@ -737,7 +737,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 						}
 						userdata.finished.push({id: req.params.id, file: 'config-' + rndname + '.zip'});
 						userdata=await JSON.stringify(userdata);
-						con.query('update users set data=? where username=?', [userdata, data.org[i].name]);
+						con.query('update users set data=? where username=?', [userdata, results[0].username);
 					});
 				}
 				con.query('delete from pending where id=?', req.params.id);
