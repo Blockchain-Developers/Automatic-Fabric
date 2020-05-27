@@ -686,8 +686,8 @@ router.post('/:id/'+secretkey, async function(req, res) {
 	con.query('select data from pending where id=?', req.params.id, async function(err, results) {
 		if (results.length) {
 
-			var pendingdata = results[0].data;
-			pendingdata = await JSON.parse(pendingdata);
+			var pd = results[0].data;
+			var pendingdata = await JSON.parse(pd);
 			var decision = 0;
 			for (var i = 0; i < pendingdata.orgcount; i++) {
 				if (pendingdata.org[i].name == req.session.user) {
@@ -735,7 +735,7 @@ router.post('/:id/'+secretkey, async function(req, res) {
 								it=i;
 							}
 						}
-						delete userdata.pendint[it];
+						delete userdata.pending[it];
 						userdata.finished.push({id: req.params.id, file: '/download/' + 'config-' + rndname + '.zip'});
 						userdata=await JSON.stringify(userdata);
 						con.query('update users set data=? where username=?', [userdata, req.session.user]);
