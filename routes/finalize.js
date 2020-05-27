@@ -731,7 +731,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 								it=i;
 							}
 						}
-						delete userdata.pending[it];
+						userdata.pending.splice(it,1);
 						if(!userdata.finished){
 							userdata.finished=[];
 						}
