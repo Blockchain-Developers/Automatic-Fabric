@@ -61,7 +61,7 @@ function dckryamlgen(data, orgnumber) {
 	let dckr;
 	dckr += '"version": "2",'; // HEAD_{
 	dckr += '"volumes": {'; // volumes_{
-	for (var i = 0; i < data[orgnumber].peercount; i++) { // peers
+	for (var i = 0; i < data.org[orgnumber].peercount; i++) { // peers
 		dckr += '"' + data.org[orgnumber].peer[i].name + '.' + data.org[orgnumber].name + '.com": null,';
 	}
 	dckr += '"orderer.' + data.org[orgnumber].name + 'ord.com": null'; // orderer
