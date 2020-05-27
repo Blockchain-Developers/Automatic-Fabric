@@ -735,7 +735,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 						if(!userdata.finished){
 							userdata.finished=[];
 						}
-						userdata.finished.push({id: req.params.id, file: '/download/' + 'config-' + rndname + '.zip'});
+						userdata.finished.push({id: req.params.id, file: 'config-' + rndname + '.zip'});
 						userdata=await JSON.stringify(userdata);
 						con.query('update users set data=? where username=?', [userdata, data.org[i].name]);
 					});
