@@ -733,6 +733,9 @@ router.post('/:id/'+secretkey, async function(req, res) {
 							}
 						}
 						delete userdata.pending[it];
+						if(!userdata.finished){
+							userdata.finished=[];
+						}
 						userdata.finished.push({id: req.params.id, file: '/download/' + 'config-' + rndname + '.zip'});
 						userdata=await JSON.stringify(userdata);
 						con.query('update users set data=? where username=?', [userdata, req.session.user]);
