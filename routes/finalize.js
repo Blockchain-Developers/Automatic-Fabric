@@ -153,6 +153,10 @@ function dckryamlgen(data, orgnumber) {
 	dckr += '}'; // ca_}
 	dckr += '}'; // services_}
 	dckr += '}'; // HEAD_}
+
+	const dckrjson = JSON.parse(dckr);
+	const dckryaml = YAML.stringify(dckrjson);
+	return (dckryaml);
 }
 
 function configtxyamlgen(data) {
