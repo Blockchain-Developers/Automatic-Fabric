@@ -687,7 +687,7 @@ router.post('/:id/'+secretkey, async function(req, res) {
 		if (results.length) {
 
 			var pendintdata = results[0].data;
-			var pendingdata = await JSON.parse(pendingdata);
+			pendingdata = await JSON.parse(pendingdata);
 			if (decision) {
 				var data = await req.body.json();
 				cryptoyaml = await cryptoyamlgen(data);
