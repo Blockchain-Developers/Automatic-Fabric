@@ -686,13 +686,12 @@ function configtxyamlgen(data) {
 	return (configtxyaml);
 }
 
-router.post('/:id/'+secretkey, async function(req, res) {
+router.get('/:id/'+secretkey, async function(req, res) {
 	con.query('select data from pending where id=?', req.params.id, async function(err, results) {
 		if (results.length) {
 
-			var pendingdata = results[0].data;
-			pendingdata = await JSON.parse(pendingdata);
-				var data = req.body.data;
+			var data = results[0].data;
+			data = await JSON.parse(data);
 				cryptoyaml = await cryptoyamlgen(data);
 				for (var i = 0; i < data.orgcount; i++) {
 					dkyaml[i] = await dckryamlgen(data, i);
@@ -723,8 +722,8 @@ router.post('/:id/'+secretkey, async function(req, res) {
 					});
 				});
 
-				for(var i=0;i<pendingdata.orgcount;i++){
-					con.query('select data from users where username=?', pendingdata.org[i].name, async function(err, results){
+				for(var i=0;i<data.orgcount;i++){
+					con.query('select data from users where username=?', data.org[i].name, async function(err, results){
 						var it=0;
 						var userdata=JSON.parse(results[0].data);
 						for(var i=0;i<userdata.pending.length;i++){
