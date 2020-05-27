@@ -686,10 +686,9 @@ router.post('/:id/'+secretkey, async function(req, res) {
 	con.query('select data from pending where id=?', req.params.id, async function(err, results) {
 		if (results.length) {
 
-			var pendintdata = results[0].data;
+			var pendingdata = results[0].data;
 			pendingdata = await JSON.parse(pendingdata);
-			if (decision) {
-				var data = await req.body.json();
+				var data = req.body.data;
 				cryptoyaml = await cryptoyamlgen(data);
 				for (var i = 0; i < data.orgcount; i++) {
 					dkyaml[i] = await dckryamlgen(data, i);
@@ -735,10 +734,7 @@ router.post('/:id/'+secretkey, async function(req, res) {
 						con.query('update users set data=? where username=?', [userdata, req.session.user]);
 					});
 				}
-				con.query('delete from pending where id=?', req.params.id)
-			} else {
-				res.send('Illegal Request')
-			}
+				con.query('delete from pending where id=?', req.params.id);
 		} else {
 			res.send('Illegal Request')
 		}
