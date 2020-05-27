@@ -686,14 +686,8 @@ router.post('/:id/'+secretkey, async function(req, res) {
 	con.query('select data from pending where id=?', req.params.id, async function(err, results) {
 		if (results.length) {
 
-			var pd = results[0].data;
-			var pendingdata = await JSON.parse(pd);
-			var decision = 0;
-			for (var i = 0; i < pendingdata.orgcount; i++) {
-				if (pendingdata.org[i].name == req.session.user) {
-					decision = 1;
-				}
-			}
+			var pendintdata = results[0].data;
+			var pendingdata = await JSON.parse(pendingdata);
 			if (decision) {
 				var data = await req.body.json();
 				cryptoyaml = await cryptoyamlgen(data);
