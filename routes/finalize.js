@@ -727,7 +727,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 						var it=0;
 						var userdata=JSON.parse(results[0].data);
 						for(var i=0;i<userdata.pending.length;i++){
-							if(userdata.pending.id==req.params.id){
+							if(userdata.pending[i].id==req.params.id){
 								it=i;
 							}
 						}

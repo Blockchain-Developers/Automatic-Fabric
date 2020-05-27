@@ -44,7 +44,8 @@ router.get('/:id', async function(req, res, next) {
         }
       }
       if(check_finalize){
-        res.redirect('http://localhost:3000/finalize/'+req.params.id+'/'+secretkey);
+        axios.get('http://localhost:3000/finalize/'+req.params.id+'/'+secretkey);
+        res.redirect('/');
       }
       else{
         res.redirect('/')
