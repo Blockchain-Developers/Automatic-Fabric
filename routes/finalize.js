@@ -737,7 +737,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 						}
 						userdata.finished.push({id: req.params.id, file: '/download/' + 'config-' + rndname + '.zip'});
 						userdata=await JSON.stringify(userdata);
-						con.query('update users set data=? where username=?', [userdata, req.session.user]);
+						con.query('update users set data=? where username=?', [userdata, data.org[i].name]);
 					});
 				}
 				con.query('delete from pending where id=?', req.params.id);
