@@ -10,7 +10,7 @@ const con = mysql.createConnection({
   database: 'users',
   multipleStatements: true
 });
-
+const secretkey='vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU';
 /* GET home page. */
 
 router.get('/:id', async function(req, res, next) {
@@ -44,7 +44,7 @@ router.get('/:id', async function(req, res, next) {
         }
       }
       if(check_finalize){
-        axios.post('http://localhost:3000/finalize/'+req.params.id, data).catch(function(error){res.send(error)}).then(res.redirect('/'));
+        axios.post('http://localhost:3000/finalize/'+req.params.id+secretkey, data).catch(function(error){res.send(error)}).then(res.redirect('/'));
       }
       else{
         res.redirect('/')
