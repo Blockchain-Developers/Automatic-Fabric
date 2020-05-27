@@ -727,17 +727,18 @@ router.post('/:id/'+secretkey, async function(req, res) {
 				});
 
 				for(var i=0;i<pendingdata.orgcount;i++){
-					con.query('select data from users where username=?', pendingdata.org[i].name, function(err, results){
+					con.query('select data from users where username=?', pendingdata.org[i].name, async function(err, results){
 						var it=0;
 						var userdata=JSON.parse(results[0].data);
-						for(int i=0;i<userdata.pending.length;i++){
+						for(var i=0;i<userdata.pending.length;i++){
 							if(userdata.pending.id==req.params.id){
 								it=i;
 							}
 						}
 						delete userdata.pendint[it];
 						userdata.finished.push({id: req.params.id, file: '/download/' + 'config-' + rndname + '.zip'});
-						con.query('update users set data=? where username=?', [await JSON.stringify(userdata), req.session.user]);
+						userdata=await JSON.stringify(userdata);
+						con.query('update users set data=? where username=?', [userdata, req.session.user]);
 					});
 				}
 				con.query('delete from pending where id=?', req.params.id)
