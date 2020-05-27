@@ -28,27 +28,29 @@ head
                       h5 Pending
                   if(data)
                     if(data.pending)
-                      each val, index in data.pending
-                        tr
-                          td.text-left(width='50%') #{val.id}
-                          if(val.filled==1)
-                            td.text-center
-                              a.btn.btn-primary(role='button' href='/edit/'+val.id style='width:90px') Edit Info
-                              a.btn.btn-dark(role='button' href='/confirm/'+val.id style='width:90px;margin-left:5px') Confirm
-                          else if(val.filled==2)
-                            td.text-center
-                              a.btn.btn-light(role='button' disabled='') Confirmed
-                          else
-                            td.text-center
-                              a.btn.btn-danger(role='button' href='/fill/'+val.id style='width:90px') Fill Info
+                      if(data.pending[0])
+                        each val, index in data.pending
+                          tr
+                            td.text-left(width='50%') #{val.id}
+                            if(val.filled==1)
+                              td.text-center
+                                a.btn.btn-primary(role='button' href='/edit/'+val.id style='width:90px') Edit Info
+                                a.btn.btn-dark(role='button' href='/confirm/'+val.id style='width:90px;margin-left:5px') Confirm
+                            else if(val.filled==2)
+                              td.text-center
+                                a.btn.btn-light(role='button' disabled='') Confirmed
+                            else
+                              td.text-center
+                                a.btn.btn-danger(role='button' href='/fill/'+val.id style='width:90px') Fill Info
                   tr
                     td.text-left
                       h5(style='margin-top:10px') Finished
                       if(data)
                         if(data.finished)
-                          each val, index in data.finished
-                            tr
-                              td.text-left(width='50%')
-                                a(href='/download/'+val.file) #{val.id}
+                          if(data.finished[0])
+                            each val, index in data.finished
+                              tr
+                                td.text-left(width='50%')
+                                  a(href='/download/'+val.file) #{val.id}
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
