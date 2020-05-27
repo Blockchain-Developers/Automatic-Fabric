@@ -51,7 +51,7 @@ function cryptoyamlgen(data) {
 		crypto = crypto + "]}";
 	}
 	crypto = crypto + "]}";
-	console.log(crypto);
+	// console.log(crypto);
 	const cryptojson = JSON.parse(crypto);
 	const cryptoyaml = YAML.stringify(cryptojson);
 	return (cryptoyaml);
