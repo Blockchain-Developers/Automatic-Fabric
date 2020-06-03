@@ -708,7 +708,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           var zip = new AdmZip();
           await zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
           await zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/peerOrganizations/' + data.org[i].name + '.com', 'crypto-config/peerOrganizations/' + data.org[i].name + '.com');
-          await zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
+          await zip.addFile("docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
           // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
           await zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
           await zip.addLocalFile("files/node-base.yaml");
