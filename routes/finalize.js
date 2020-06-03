@@ -716,15 +716,14 @@ router.get('/:id/' + secretkey, async function(req, res) {
           for (var j = 0; j < data.orgcount; j++) {
             ca_keys += 'export testnet_ca_' + data.org[j].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[j].name + '.com/ca && ls *_sk)\n'
           }
-          //const rndtmpname = await randomstring.generate(6);
+          const rndtmpname = await randomstring.generate(6);
           const rnddownloadname = await randomstring.generate(64);
-          fs.copyFile('files/testnet.sh', 'files/temp/start.sh', (err) => {
-            insertLine('files/temp/start.sh').content(ca_keys).at(19).then(function(err) {
-              zip.addLocalFile('files/temp/start.sh');
+          fs.copyFile('files/testnet.sh', 'files/temp/'+rndtmpname+'.sh', (err) => {
+            insertLine('files/temp/'+rndtmpname+'.sh').content(ca_keys).at(19).then(function(err) {
+              zip.addLocalFile('files/temp/'+rndtempname+'.sh');
               zip.writeZip('public/download/' + rnddownloadname + '.zip');
               downloadlinkarr.push(rnddownloadname + '.zip');
             });
-						fs.unlink('files/temp/start.sh')
           });
         }
 
@@ -749,6 +748,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           });
         }
         con.query('delete from pending where id=?', req.params.id);
+	res.send("Success")
       });
     } else {
       res.send('Illegal Request')
