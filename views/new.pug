@@ -15,12 +15,19 @@ script.
   var newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
   newEntry.find('input').val('');
   }).on('click', '.btn-remove', function(e) {
-  if($('.controls .entry').length!=1){
+  if($('.controls .entry').length!=0){
     $(this).parents('.entry:first').remove();
   }
   e.preventDefault();
   return false;
   });
+  });
+  $("form").submit(function(event){
+    if($('.controls .entry').length%2==1){
+      return;
+    }
+    alert("Member count must be odd")
+    event.preventDefault();
   });
 div
   .container(style='width: 80%;height: 60%;')

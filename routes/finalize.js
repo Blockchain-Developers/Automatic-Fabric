@@ -4,9 +4,11 @@ var AdmZip = require('adm-zip');
 var randomstring = require("randomstring");
 var CronJob = require('cron').CronJob;
 const fs = require('fs');
-const fsExtra = require('fs-extra')
+const fsExtra = require('fs-extra');
 const YAML = require('json-to-pretty-yaml');
-const insertLine = require('insert-line')
+const insertLine = require('insert-line');
+const write = require('write');
+var cmd = require('node-cmd');
 
 const secretkey='vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU';
 
@@ -689,58 +691,62 @@ function configtxyamlgen(data) {
 router.get('/:id/'+secretkey, async function(req, res) {
 	con.query('select data from pending where id=?', req.params.id, async function(err, results) {
 		if (results.length) {
-
 			var data = results[0].data;
 			data = await JSON.parse(data);
-				cryptoyaml = await cryptoyamlgen(data);
-				for (var i = 0; i < data.orgcount; i++) {
-					dkyaml[i] = await dckryamlgen(data, i);
-					// dckryaml=await dckryamlgen(data);
-				}
-				configtxyaml = await configtxyamlgen(data);
+			for (var i = 0; i < data.orgcount; i++) {
+				dkyaml[i] = await dckryamlgen(data, i);
+				// dckryaml=await dckryamlgen(data);
+			}
+			configtxyaml = await configtxyamlgen(data);
+			cryptoyaml = await cryptoyamlgen(data);
+			const cryptodir = await randomstring.generate(6);
+			cmd.run('mkdir files/temp/'+cryptodir);
+			await write.sync('files/temp/'+cryptodir+'/crypto-config.yaml', cryptoyaml);
+			cmd.run('cryptogen generate --config=files/temp/'+cryptodir+'/crypto-config.yaml --output=files/temp/'+cryptodir+'/crypto-config');
 
+			var downloadlinkarr==[];
+			for (var i = 0; i < data.orgcount; i++) {
 				var zip = new AdmZip();
-				zip.addFile("crypto-config.yaml", Buffer.alloc(cryptoyaml.length, cryptoyaml), "");
-				for (var i = 0; i < data.orgcount; i++) {
-					zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
-					// zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
-				}
+				zip.addLocalFolder('files/temp/'+cryptodir+'/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
+				zip.addLocalFolder('files/temp/'+cryptodir+'/crypto-config/peerOrganizations/' + data.org[i].name + '.com', 'crypto-config/peerOrganizations/' + data.org[i].name + '.com');
+				zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
+				// zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
 				zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
 				zip.addLocalFile("files/node-base.yaml");
-
 				var ca_keys = '';
-				for (var i = 0; i < data.orgcount; i++) {
-					ca_keys += 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n'
+				for (var j = 0; j < data.orgcount; j++) {
+					ca_keys += 'export testnet_ca_' + data.org[j].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[j].name + '.com/ca && ls *_sk)\n'
 				}
-				const rndname = await randomstring.generate(6);
+				const rndtmpname = await randomstring.generate(6);
+				const rnddownloadname = await randomstring.generate(64);
 				fs.copyFile('files/testnet.sh', 'files/temp/' + rndname + '.sh', (err) => {
-					insertLine('files/temp/' + rndname + '.sh').content(ca_keys).at(19).then(function(err) {
-						zip.addLocalFile('files/temp/' + rndname + '.sh');
-						zip.writeZip('public/download/' + 'config-' + rndname + '.zip');
-						//res.type('document');
-						//res.redirect('/download/' + 'config-' + rndname + '.zip');
+					insertLine('files/temp/' + rndtmpname + '.sh').content(ca_keys).at(19).then(function(err) {
+						zip.addLocalFile('files/temp/' + rndtmpname + '.sh', 'start.sh');
+						zip.writeZip('public/download/' + rnddownloadname + '.zip');
+						downloadlinkarr.push(rnddownloadname+'.zip');
 					});
 				});
+			}
 
-				for(var i=0;i<data.orgcount;i++){
-					con.query('select username, data from users where username=?', data.org[i].name, async function(err, results){
-						var it=0;
-						var userdata=JSON.parse(results[0].data);
-						for(var i=0;i<userdata.pending.length;i++){
-							if(userdata.pending[i].id==req.params.id){
-								it=i;
-							}
+			for(var i=0;i<data.orgcount;i++){
+				con.query('select username, data from users where username=?', data.org[i].name, async function(err, results){
+					var it=0;
+					var userdata=JSON.parse(results[0].data);
+					for(var i=0;i<userdata.pending.length;i++){
+						if(userdata.pending[i].id==req.params.id){
+							it=i;
 						}
-						userdata.pending.splice(it,1);
-						if(!userdata.finished){
-							userdata.finished=[];
-						}
-						userdata.finished.push({id: req.params.id, file: 'config-' + rndname + '.zip'});
-						userdata=await JSON.stringify(userdata);
-						con.query('update users set data=? where username=?', [userdata, results[0].username]);
-					});
-				}
-				con.query('delete from pending where id=?', req.params.id);
+					}
+					userdata.pending.splice(it,1);
+					if(!userdata.finished){
+						userdata.finished=[];
+					}
+					userdata.finished.push({id: req.params.id, file: downloadlinkarr[i]});
+					userdata=await JSON.stringify(userdata);
+					con.query('update users set data=? where username=?', [userdata, results[0].username]);
+				});
+			}
+			con.query('delete from pending where id=?', req.params.id);
 		} else {
 			res.send('Illegal Request')
 		}
