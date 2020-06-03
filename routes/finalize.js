@@ -718,7 +718,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           }
           const rndtmpname = await randomstring.generate(6);
           const rnddownloadname = await randomstring.generate(64);
-          fs.copyFile('files/testnet.sh', 'files/temp/' + rndname + '.sh', (err) => {
+          fs.copyFile('files/testnet.sh', 'files/temp/' + rndtmpname + '.sh', (err) => {
             insertLine('files/temp/' + rndtmpname + '.sh').content(ca_keys).at(19).then(function(err) {
               zip.addLocalFile('files/temp/' + rndtmpname + '.sh', 'start.sh');
               zip.writeZip('public/download/' + rnddownloadname + '.zip');
