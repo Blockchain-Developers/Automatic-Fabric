@@ -47,13 +47,15 @@ var fillRouter = require('./routes/fill');
 var editRouter = require('./routes/edit');
 var confirmRouter = require('./routes/confirm')
 var finalizeRouter = require('./routes/finalize')
+var settingsRouter = require('./routes/settings')
 
 app.use('/', indexRouter);
 app.use('/new', newRouter);
 app.use('/fill', fillRouter);
 app.use('/edit', editRouter);
 app.use('/confirm', confirmRouter);
-app.use('/finalize', finalizeRouter)
+app.use('/finalize', finalizeRouter);
+app.use('/settings', settingsRouter);
 app.use('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');
