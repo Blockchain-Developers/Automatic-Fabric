@@ -706,25 +706,24 @@ router.get('/:id/' + secretkey, async function(req, res) {
         var downloadlinkarr = [];
         for (var i = 0; i < data.orgcount; i++) {
           var zip = new AdmZip();
-          zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
-          zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/peerOrganizations/' + data.org[i].name + '.com', 'crypto-config/peerOrganizations/' + data.org[i].name + '.com');
-          zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
+          await zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
+          await zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/peerOrganizations/' + data.org[i].name + '.com', 'crypto-config/peerOrganizations/' + data.org[i].name + '.com');
+          await zip.addFile("org" + i + "-docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
           // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
-          zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
-          zip.addLocalFile("files/node-base.yaml");
+          await zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
+          await zip.addLocalFile("files/node-base.yaml");
           var ca_keys = '';
           for (var j = 0; j < data.orgcount; j++) {
             ca_keys += 'export testnet_ca_' + data.org[j].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[j].name + '.com/ca && ls *_sk)\n'
           }
           const rndtmpname = await randomstring.generate(6);
           const rnddownloadname = await randomstring.generate(64);
-          fs.copyFile('files/testnet.sh', 'files/temp/'+rndtmpname+'.sh', (err) => {
-            insertLine('files/temp/'+rndtmpname+'.sh').content(ca_keys).at(19).then(function(err) {
-              zip.addLocalFile('files/temp/'+rndtempname+'.sh');
-              zip.writeZip('public/download/' + rnddownloadname + '.zip');
-              downloadlinkarr.push(rnddownloadname + '.zip');
-            });
-          });
+          await fs.copyFileSync('files/testnet.sh', 'files/temp/start.sh')
+          await insertLine('files/temp/start.sh').content(ca_keys).atSync(19)
+          await zip.addLocalFile('files/temp/start.sh');
+          await zip.writeZip('public/download/' + rnddownloadname + '.zip');
+          await downloadlinkarr.push(rnddownloadname + '.zip');
+
         }
 
         for (var i = 0; i < data.orgcount; i++) {
@@ -741,7 +740,8 @@ router.get('/:id/' + secretkey, async function(req, res) {
               userdata.finished = [];
             }
             userdata.finished.push({
-              id: req.params.id
+              id: req.params.id,
+							file: downloadlinkarr[i];
             });
             userdata = await JSON.stringify(userdata);
             con.query('update users set data=? where username=?', [userdata, results[0].username]);
