@@ -12,8 +12,14 @@ const con = mysql.createConnection({
 /* GET home page. */
 
 router.get('/', async function(req, res, next) {
-  con.query('select data from users where username=?', req.session.user, function(err, results){
-    var data=JSON.parse(results[0].data);
+  con.query('select data, role from users where username=?', req.session.user, function(err, results){
+    var data;
+    if(results[0].role=='user'){
+      data=JSON.parse(results[0].data);
+    }
+    else{
+      data={};
+    }
     res.render('index', {user:req.session.user, isadmin:req.session.admin, data:data});
   });
 });
