@@ -22,6 +22,15 @@ script.
   return false;
   });
   });
+  $(document).ready(function(){
+    $("form").submit(function(e){
+      if($('.controls .entry').length%2==0){
+        return;
+      }
+      alert("For the consensus to function, the number of collatorators must be odd")
+      e.preventDefault();
+    });
+  });
 div
   .container(style='width: 80%;height: 60%;')
     .row
