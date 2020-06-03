@@ -702,9 +702,9 @@ router.get('/:id/'+secretkey, async function(req, res) {
 			const cryptodir = await randomstring.generate(6);
 			cmd.run('mkdir files/temp/'+cryptodir);
 			await write.sync('files/temp/'+cryptodir+'/crypto-config.yaml', cryptoyaml);
-			cmd.run('cryptogen generate --config=files/temp/'+cryptodir+'/crypto-config.yaml --output=files/temp/'+cryptodir+'/crypto-config');
+			await cmd.get('export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/'+cryptodir+'/crypto-config.yaml --output="./files/temp/'+cryptodir+'/crypto-config"', async function(err, data, stderr){
 
-			var downloadlinkarr==[];
+			var downloadlinkarr=[];
 			for (var i = 0; i < data.orgcount; i++) {
 				var zip = new AdmZip();
 				zip.addLocalFolder('files/temp/'+cryptodir+'/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
@@ -747,6 +747,7 @@ router.get('/:id/'+secretkey, async function(req, res) {
 				});
 			}
 			con.query('delete from pending where id=?', req.params.id);
+});
 		} else {
 			res.send('Illegal Request')
 		}

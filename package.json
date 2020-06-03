@@ -21,11 +21,13 @@
     "json-to-pretty-yaml": "^1.2.2",
     "morgan": "~1.9.1",
     "mysql": "^2.18.1",
+    "node-cmd": "^3.0.0",
     "password-hash": "^1.2.2",
     "pug": "^2.0.4",
     "randomstring": "^1.1.5",
     "remove": "^0.1.5",
     "tough": "^0.6.0",
+    "write": "^2.0.0",
     "yarn": "^1.22.4"
   }
 }
