@@ -703,8 +703,8 @@ router.get('/:id/' + secretkey, async function(req, res) {
       cmd.run('mkdir files/temp/' + cryptodir);
       await write.sync('files/temp/' + cryptodir + '/crypto-config.yaml', cryptoyaml);
       cmd.get('export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' + cryptodir + '/crypto-config.yaml --output="./files/temp/' + cryptodir + '/crypto-config"', async function(err, dat, stderr) {
+        var downloadlinkarr = [];
         for (var i = 0; i < data.orgcount; i++) {
-					var downloadlinkarr;
           var zip = new AdmZip();
           zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
           zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/peerOrganizations/' + data.org[i].name + '.com', 'crypto-config/peerOrganizations/' + data.org[i].name + '.com');
@@ -722,10 +722,12 @@ router.get('/:id/' + secretkey, async function(req, res) {
             insertLine('files/temp/' + rndtmpname + '.sh').content(ca_keys).at(19).then(function(err) {
               zip.addLocalFile('files/temp/' + rndtmpname + '.sh', 'start.sh');
               zip.writeZip('public/download/' + rnddownloadname + '.zip');
-              downloadlinkarr=rnddownloadname + '.zip';
+              downloadlinkarr.push(rnddownloadname + '.zip');
             });
           });
+        }
 
+        for (var i = 0; i < data.orgcount; i++) {
           con.query('select username, data from users where username=?', data.org[i].name, async function(err, results) {
             var it = 0;
             var userdata = JSON.parse(results[0].data);
@@ -739,8 +741,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
               userdata.finished = [];
             }
             userdata.finished.push({
-              id: req.params.id,
-              file: downloadlinkarr
+              id: req.params.id
             });
             userdata = await JSON.stringify(userdata);
             con.query('update users set data=? where username=?', [userdata, results[0].username]);
