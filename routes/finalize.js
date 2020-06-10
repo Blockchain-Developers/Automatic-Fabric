@@ -728,7 +728,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           const rndtmpname = await randomstring.generate(6);
           await fs.copyFileSync('files/node-base.yaml', 'files/temp/node-base.yaml')
           await insertLine('files/temp/node-base.yaml').content(extra_hosts).at(26)
-          await zip.addLocalFile("files/node-base.yaml");
+          await zip.addLocalFile("files/temp/node-base.yaml");
 
           var ca_keys = 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n';
 
