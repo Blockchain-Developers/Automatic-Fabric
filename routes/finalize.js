@@ -723,7 +723,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           await insertLine('files/temp/start.sh').content(ca_keys).at(19)
           await zip.addLocalFile('files/temp/start.sh');
           await zip.writeZip('public/download/' + rnddownloadname + '.zip');
-          var { networkid, PublicIp } = await setupNetwork();
+          var { networkid, PublicIp } = await aws.setupNetwork();
           await network.data.push({PublicIp:PublicIp,networkid:networkid ,file:rnddownloadname + '.zip'});
         }
 
