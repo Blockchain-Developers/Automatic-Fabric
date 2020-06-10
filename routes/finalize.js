@@ -710,7 +710,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
       var extra_hosts='    extra_hosts:\n';
       for(var i = 0; i < data.orgcount; i++){
         var { networkid, Ip } = await aws.setupNetwork();
-        await network.data.push({Ip:Ip,networkid:networkid ,file:rnddownloadname + '.zip'});
+        await network.data.push({Ip:Ip,networkid:networkid});
         extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"';
       }
 
@@ -733,6 +733,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           var ca_keys = 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n';
 
           const rnddownloadname = await randomstring.generate(64);
+          network.data.file=rnddownloadname + '.zip';
           await fs.copyFileSync('files/testnet.sh', 'files/temp/start.sh')
           await insertLine('files/temp/start.sh').content(ca_keys).at(19)
           await zip.addLocalFile('files/temp/start.sh');
