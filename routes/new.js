@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var randomstring = require("randomstring");
-const { promisfy } = require("util");
+const { promisify } = require("util");
 
 const mysql = require("mysql");
 const con = mysql.createConnection({
@@ -12,7 +12,7 @@ const con = mysql.createConnection({
     multipleStatements: true,
 });
 
-const queryAsync = promisfy(con.query);
+const queryAsync = promisify(con.query);
 
 /* GET home page. */
 
