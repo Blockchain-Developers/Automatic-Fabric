@@ -707,6 +707,13 @@ router.get('/:id/' + secretkey, async function(req, res) {
 
       var network={id:req.params.id, data:[]};
 
+      var extra_hosts='    extra_hosts:\n';
+      for((var i = 0; i < data.orgcount; i++){
+        await network.data.push({Ip:Ip,networkid:networkid ,file:rnddownloadname + '.zip'});
+        extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"';
+      }
+
+
       cmd.get('export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' + cryptodir + '/crypto-config.yaml --output="./files/temp/' + cryptodir + '/crypto-config"', async function(err, dat, stderr) {
         for (var i = 0; i < data.orgcount; i++) {
           var zip = new AdmZip();
@@ -715,16 +722,22 @@ router.get('/:id/' + secretkey, async function(req, res) {
           await zip.addFile("docker-compose.yaml", Buffer.alloc(dkyaml[i].length, dkyaml[i]), "");
           // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
           await zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
-          await zip.addLocalFile("files/node-base.yaml");
-          var ca_keys = 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n';
+
+
           const rndtmpname = await randomstring.generate(6);
+          await fs.copyFileSync('files/node-base.yaml', 'files/temp/node-base.yaml')
+          await insertLine('files/temp/node-base.yaml').content(extra_hosts).at(26)
+          await zip.addLocalFile("files/node-base.yaml");
+
+          var ca_keys = 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n';
+
           const rnddownloadname = await randomstring.generate(64);
           await fs.copyFileSync('files/testnet.sh', 'files/temp/start.sh')
           await insertLine('files/temp/start.sh').content(ca_keys).at(19)
           await zip.addLocalFile('files/temp/start.sh');
           await zip.writeZip('public/download/' + rnddownloadname + '.zip');
-          var { networkid, PublicIp } = await aws.setupNetwork();
-          await network.data.push({PublicIp:PublicIp,networkid:networkid ,file:rnddownloadname + '.zip'});
+          var { networkid, Ip } = await aws.setupNetwork();
+
         }
 
 

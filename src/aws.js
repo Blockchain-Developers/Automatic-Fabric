@@ -64,7 +64,7 @@ async function allocateAddress() {
     data = {
          AllocationId: "eipalloc-64d5890a",
          Domain: "vpc",
-         PublicIp: "203.0.113.0"
+         Ip: "203.0.113.0"
     }
     */
     return data;
@@ -118,9 +118,9 @@ async function setupNetwork(use_public_ip = true) {
     };
     if (use_public_ip) {
         let { networkid } = await createNetworkInterface(networkconfig);
-        let { AllocationId, PublicIp } = await allocateAddress();
+        let { AllocationId, Ip } = await allocateAddress();
         let { AssociationId } = await associateAddress(AllocationId, networkid);
-        return { networkid, PublicIp, AssociationId, AllocationId };
+        return { networkid, Ip, AssociationId, AllocationId };
     } else {
         let { networkid, PrivateIpAddress } = await createNetworkInterface(
             networkconfig
@@ -153,7 +153,7 @@ async function launchInstanceOfNetwork(networkid) {
     return InstanceId;
 }
 async function test() {
-    let { networkid, PublicIp } = await setupNetwork();
+    let { networkid, Ip } = await setupNetwork();
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
 module.exports = {setupNetwork, launchInstanceOfNetwork};
