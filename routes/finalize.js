@@ -708,7 +708,8 @@ router.get('/:id/' + secretkey, async function(req, res) {
       var network={id:req.params.id, data:[]};
 
       var extra_hosts='    extra_hosts:\n';
-      for((var i = 0; i < data.orgcount; i++){
+      for(var i = 0; i < data.orgcount; i++){
+        var { networkid, Ip } = await aws.setupNetwork();
         await network.data.push({Ip:Ip,networkid:networkid ,file:rnddownloadname + '.zip'});
         extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"';
       }
@@ -736,7 +737,6 @@ router.get('/:id/' + secretkey, async function(req, res) {
           await insertLine('files/temp/start.sh').content(ca_keys).at(19)
           await zip.addLocalFile('files/temp/start.sh');
           await zip.writeZip('public/download/' + rnddownloadname + '.zip');
-          var { networkid, Ip } = await aws.setupNetwork();
 
         }
 
