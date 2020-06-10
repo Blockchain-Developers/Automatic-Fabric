@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "aws-sdk": "^2.686.0",
     "adm-zip": "^0.4.14",
     "axios": "^0.19.2",
     "blob": "^0.1.0",
