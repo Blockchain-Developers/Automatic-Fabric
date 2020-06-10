@@ -60,7 +60,7 @@ async function createNetworkInterface(networkconfig) {
 async function allocateAddress() {
     let data = await ec2.allocateAddress({ Domain: "vpc" }).promise();
     console.log(data);
-    /*  
+    /*
     data = {
          AllocationId: "eipalloc-64d5890a",
          Domain: "vpc",
@@ -156,3 +156,4 @@ async function test() {
     let { networkid, PublicIp } = await setupNetwork();
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
+module.exports = {setupNetwork, launchInstanceOfNetwork};
