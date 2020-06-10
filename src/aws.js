@@ -110,7 +110,7 @@ async function attachInterface(params) {
     console.log(data);
     return data;
 }
-async function setupNetwork(use_public_ip = true) {
+async function setupNetwork(use_public_ip = false) {
     var networkconfig = {
         Description: "Org1Network",
         Groups: ["sg-02ccaa6d2af666c9a"],
