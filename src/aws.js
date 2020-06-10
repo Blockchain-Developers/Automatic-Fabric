@@ -156,4 +156,3 @@ async function test() {
     let { networkid, PublicIp } = await setupNetwork();
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
-test();
