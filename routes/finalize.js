@@ -10,6 +10,7 @@ const insertLine = require('insert-line');
 const write = require('write');
 var cmd = require('node-cmd');
 const aws =require('./src/aws');
+const { promisfy } = require('util');
 
 const secretkey = 'vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU';
 

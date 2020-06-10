@@ -12,7 +12,7 @@ const con = mysql.createConnection({
     multipleStatements: true,
 });
 
-const queryAsync = promisify(con.query);
+const queryAsync = promisify(con.query).bind(con);
 
 /* GET home page. */
 
