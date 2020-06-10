@@ -716,7 +716,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
           // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
           await zip.addFile("configtx.yaml", Buffer.alloc(configtxyaml.length, configtxyaml), "");
           await zip.addLocalFile("files/node-base.yaml");
-          var ca_keys = 'export testnet_ca_' + data.org[j].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[j].name + '.com/ca && ls *_sk)\n';
+          var ca_keys = 'export testnet_ca_' + data.org[i].name + '_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/' + data.org[i].name + '.com/ca && ls *_sk)\n';
           const rndtmpname = await randomstring.generate(6);
           const rnddownloadname = await randomstring.generate(64);
           await fs.copyFileSync('files/testnet.sh', 'files/temp/start.sh')
