@@ -118,9 +118,9 @@ async function setupNetwork(use_public_ip = false) {
     };
     if (use_public_ip) {
         let { networkid } = await createNetworkInterface(networkconfig);
-        let { AllocationId, Ip } = await allocateAddress();
+        let { AllocationId, PublicIp } = await allocateAddress();
         let { AssociationId } = await associateAddress(AllocationId, networkid);
-        return { networkid, Ip, AssociationId, AllocationId };
+        return { networkid, PublicIp, AssociationId, AllocationId };
     } else {
         let { networkid, PrivateIpAddress } = await createNetworkInterface(
             networkconfig
@@ -153,7 +153,7 @@ async function launchInstanceOfNetwork(networkid) {
     return InstanceId;
 }
 async function test() {
-    let { networkid, Ip } = await setupNetwork();
+    let { networkid, PrivateIpAddress } = await setupNetwork();
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
 module.exports = {setupNetwork, launchInstanceOfNetwork};

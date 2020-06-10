@@ -709,8 +709,8 @@ router.get('/:id/' + secretkey, async function(req, res) {
 
       var extra_hosts='    extra_hosts:\n';
       for(var i = 0; i < data.orgcount; i++){
-        var { networkid, Ip } = await aws.setupNetwork();
-        await network.data.push({Ip:Ip,networkid:networkid});
+        var { networkid, PrivateIpAddress } = await aws.setupNetwork();
+        await network.data.push({Ip:PrivateIpAddress,networkid:networkid});
         extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"';
       }
 
