@@ -9,5 +9,11 @@ data text
 pending
 -----------------
 id varchar(100)
-database text
+data text
+created timestamp
+
+networks
+-----------------
+id varchar(100)
+data text
 created timestamp

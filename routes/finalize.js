@@ -9,6 +9,7 @@ const YAML = require('json-to-pretty-yaml');
 const insertLine = require('insert-line');
 const write = require('write');
 var cmd = require('node-cmd');
+const aws =require('./src/aws');
 
 const secretkey = 'vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU';
 
@@ -702,8 +703,10 @@ router.get('/:id/' + secretkey, async function(req, res) {
       const cryptodir = await randomstring.generate(6);
       cmd.run('mkdir files/temp/' + cryptodir);
       await write.sync('files/temp/' + cryptodir + '/crypto-config.yaml', cryptoyaml);
+
+      var network={id:req.params.id, data:[]};
+
       cmd.get('export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' + cryptodir + '/crypto-config.yaml --output="./files/temp/' + cryptodir + '/crypto-config"', async function(err, dat, stderr) {
-        var downloadlinkarr = [];
         for (var i = 0; i < data.orgcount; i++) {
           var zip = new AdmZip();
           await zip.addLocalFolder('files/temp/' + cryptodir + '/crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com', 'crypto-config/ordererOrganizations/ord-' + data.org[i].name + '.com');
@@ -719,9 +722,10 @@ router.get('/:id/' + secretkey, async function(req, res) {
           await insertLine('files/temp/start.sh').content(ca_keys).at(19)
           await zip.addLocalFile('files/temp/start.sh');
           await zip.writeZip('public/download/' + rnddownloadname + '.zip');
-          await downloadlinkarr.push(rnddownloadname + '.zip');
-
+          var { networkid, PublicIp } = await setupNetwork();
+          await network.data.push({PublicIp:PublicIp,networkid:networkid ,file:rnddownloadname + '.zip'});
         }
+
 
         for (var i = 0; i < data.orgcount; i++) {
           con.query('select username, data from users where username=?', data.org[i].name, async function(err, results) {
@@ -737,13 +741,19 @@ router.get('/:id/' + secretkey, async function(req, res) {
               userdata.finished = [];
             }
             userdata.finished.push({
-              id: req.params.id,
-							file: downloadlinkarr[i]
+              id: req.params.id
             });
             userdata = await JSON.stringify(userdata);
             con.query('update users set data=? where username=?', [userdata, results[0].username]);
           });
         }
+
+        for (var i = 0; i < data.orgcount; i++) {
+          network.data[i].InstanceId = await aws.launchInstanceOfNetwork(network.data[i].networkid);
+        }
+
+        network=JSON.stringify(network);
+        con.query('insert into networks set id=?, data=?', [req.params.id, network]);
         con.query('delete from pending where id=?', req.params.id);
 	res.send("Success")
       });
