@@ -711,7 +711,7 @@ router.get('/:id/' + secretkey, async function(req, res) {
       for(var i = 0; i < data.orgcount; i++){
         var { networkid, PrivateIpAddress } = await aws.setupNetwork();
         await network.data.push({Ip:PrivateIpAddress,networkid:networkid});
-        extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"';
+        extra_hosts+='      - "' + data.org[i].name + '.com:'+network.data[i].Ip + '"\n';
       }
 
 
