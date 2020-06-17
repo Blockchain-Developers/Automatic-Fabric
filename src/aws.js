@@ -114,7 +114,7 @@ async function setupNetwork(use_public_ip = false) {
     var networkconfig = {
         Description: "Org1Network",
         Groups: ["sg-02ccaa6d2af666c9a"],
-        SubnetId: "subnet-097c7e8f9cc74a89e",
+        SubnetId: "subnet-0d34a87f8aa4829d5",
     };
     if (use_public_ip) {
         let { networkid } = await createNetworkInterface(networkconfig);
