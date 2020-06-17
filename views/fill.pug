@@ -34,17 +34,17 @@ div
               tr
                 td
                   label.control-label(style='margin-top:10px') Please input orderer port
-                  input.form-control(name='ordererport' type='number' placeholder='Orderer Port' size='3' required='')
+                  input.form-control(name='ordererport' type='number' placeholder='Orderer Port' size='3' required='' min='1025' max='65535')
                 td
                   label.control-label(type='numeric' style='margin-top:10px') Please input ca port
-                  input.form-control(name='caport' type='number' placeholder='CA Port' size='3' required='')
+                  input.form-control(name='caport' type='number' placeholder='CA Port' size='3' required='' min='1025' max='65535')
               tr
             #fields.control-group
               label.control-label(style='margin-top:20px;margin-bottom:-10px') Please input peer info
             .controls
               .entry.input-group.col-xs-3
                 input.form-control(name='fields' type='text' placeholder='Peer Name' size='3' required='' style='margin-top:10px')
-                input.form-control(name='fields' type='number' placeholder='Peer Port' size='3' required='' style='margin-top:10px')
+                input.form-control(name='fields' type='number' placeholder='Peer Port' size='3' required='' style='margin-top:10px' min='1025' max='65535')
                 span.input-group-btn
                   button.btn.btn-danger.btn-remove(type='button' style='width:40px;margin-top:10px') -
               div(style='text-align:center')
