@@ -935,12 +935,28 @@ router.get("/:id/" + secretkey, async function (req, res) {
         cryptoyaml = await cryptoyamlgen(data);
         const cryptodir = await randomstring.generate(6);
         cmd.run("mkdir files/temp/" + cryptodir);
-        await write.sync(
+        await write.Async(
             "files/temp/" + cryptodir + "/crypto-config.yaml",
             cryptoyaml
         );
 
         var network = { id: req.params.id, data: [] };
+
+        var extra_hosts = "    extra_hosts:\n";
+        for (var i = 0; i < data.orgcount; i++) {
+            var { networkid, PrivateIpAddress } = await aws.setupNetwork();
+            await network.data.push({
+                Ip: PrivateIpAddress,
+                networkid: networkid,
+            });
+            extra_hosts +=
+                '      - "' +
+                data.org[i].name +
+                ".com:" +
+                network.data[i].Ip +
+                '"\n';
+        }
+
         let err,
             dat,
             stderr = await cmdgetAsync(
@@ -981,25 +997,30 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 Buffer.alloc(configtxyaml.length, configtxyaml),
                 ""
             );
-            await zip.addLocalFile("files/node-base.yaml");
+
+            const rndtmpname = await randomstring.generate(6);
+            await fs.copyFileAsync(
+                "files/node-base.yaml",
+                "files/temp/node-base.yaml"
+            );
+            await insertLine("files/temp/node-base.yaml")
+                .content(extra_hosts)
+                .at(26);
+            await zip.addLocalFile("files/temp/node-base.yaml");
+
             var ca_keys =
                 "export testnet_ca_" +
-                data.org[j].name +
+                data.org[i].name +
                 "_com_PRIVATE_KEY=$(cd ./crypto-config/peerOrganizations/" +
-                data.org[j].name +
+                data.org[i].name +
                 ".com/ca && ls *_sk)\n";
-            const rndtmpname = await randomstring.generate(6);
+
             const rnddownloadname = await randomstring.generate(64);
-            await fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
+            network.data.file = rnddownloadname + ".zip";
+            await fs.copyFileAsync("files/testnet.sh", "files/temp/start.sh");
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
             await zip.addLocalFile("files/temp/start.sh");
             await zip.writeZip("public/download/" + rnddownloadname + ".zip");
-            var { networkid, PublicIp } = await setupNetwork();
-            await network.data.push({
-                PublicIp: PublicIp,
-                networkid: networkid,
-                file: rnddownloadname + ".zip",
-            });
         }
 
         for (var i = 0; i < data.orgcount; i++) {

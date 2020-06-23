@@ -2,4 +2,5 @@
 !testnet.sh
 !multitestnet.sh
 !multitestnet_template.sh
+!add_binary.sh
 temp/
