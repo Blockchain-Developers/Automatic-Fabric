@@ -935,7 +935,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
         cryptoyaml = await cryptoyamlgen(data);
         const cryptodir = await randomstring.generate(6);
         cmd.run("mkdir files/temp/" + cryptodir);
-        await write.Async(
+        await write.sync(
             "files/temp/" + cryptodir + "/crypto-config.yaml",
             cryptoyaml
         );
@@ -999,7 +999,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             );
 
             const rndtmpname = await randomstring.generate(6);
-            await fs.copyFileAsync(
+            await fs.copyFileSync(
                 "files/node-base.yaml",
                 "files/temp/node-base.yaml"
             );
@@ -1017,7 +1017,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
 
             const rnddownloadname = await randomstring.generate(64);
             network.data.file = rnddownloadname + ".zip";
-            await fs.copyFileAsync("files/testnet.sh", "files/temp/start.sh");
+            await fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
             await zip.addLocalFile("files/temp/start.sh");
             await zip.writeZip("public/download/" + rnddownloadname + ".zip");
@@ -1031,9 +1031,9 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 );
             var it = 0;
             var userdata = JSON.parse(results[0].data);
-            for (var i = 0; i < userdata.pending.length; i++) {
-                if (userdata.pending[i].id == req.params.id) {
-                    it = i;
+            for (var j = 0; j < userdata.pending.length; j++) {
+                if (userdata.pending[j].id == req.params.id) {
+                    it = j;
                 }
             }
             userdata.pending.splice(it, 1);
