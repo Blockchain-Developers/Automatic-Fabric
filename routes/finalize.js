@@ -1016,7 +1016,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 ".com/ca && ls *_sk)\n";
 
             const rnddownloadname = await randomstring.generate(64);
-            network.data.file = rnddownloadname + ".zip";
+            network.data[i].file = rnddownloadname + ".zip";
             await fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
             await zip.addLocalFile("files/temp/start.sh");
@@ -1052,7 +1052,8 @@ router.get("/:id/" + secretkey, async function (req, res) {
 
         for (var i = 0; i < data.orgcount; i++) {
             network.data[i].InstanceId = await aws.launchInstanceOfNetwork(
-                network.data[i].networkid
+                network.data[i].networkid,
+                network.data[i].file
             );
         }
 
