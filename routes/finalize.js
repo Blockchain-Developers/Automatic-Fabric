@@ -1059,7 +1059,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             var ports=[];
             ports.push(data.org[i].orderer.port);
             ports.push(data.org[i].ca.port);
-            for(var j=0;j<data.org[i].peer.length){
+            for(var j=0;j<data.org[i].peer.length;j++){
               ports.push(data.org[i].peer[j].port);
             }
             axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name, ports:ports, ip:network.data[i].Ip})
