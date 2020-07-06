@@ -23,7 +23,7 @@ router.post('/new', async function(req, res, next){
   con.query('select * from users where username=?', username, function(err, results){
     if(!results.length){
       con.query('insert into users set username=?, passwordhash=?, role=?, status=?', [username, hashedPassword, 'User','Active']);
-      res.render('user-created', password)
+      res.render('user-created', {password:password})
     }
     else{
       res.redirect('back')
