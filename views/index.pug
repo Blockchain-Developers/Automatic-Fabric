@@ -51,5 +51,25 @@ head
                               tr
                                 td.text-left(width='50%')
                                   a(href='/download/'+val.file) #{val.id}
+            else
+              .table-responsive.table-bordered
+                table.table.table-sm
+                  tbody
+                    tr
+                      td.text-left
+                        h5 Pending
+                        if(pending)
+                          each val, index in pending
+                            tr
+                              td.text-left(width='50%') #{val.id}
+                              td.text-center #{val.created}
+                    tr
+                      td.text-left
+                        h5(style='margin-top:10px') Finished
+                        if(finished)
+                          each val, index in finished
+                            tr
+                              td.text-left(width='50%') #{val.id}
+                              td.text-center #{val.created}
 script(src='assets/js/jquery.min.js')
 script(src='assets/bootstrap/js/bootstrap.min.js')
