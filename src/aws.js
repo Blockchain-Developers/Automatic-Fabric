@@ -3,6 +3,7 @@ const AWS = require("aws-sdk");
 AWS.config.update({ region: "us-east-1" });
 
 const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
+const userData = "";
 async function createNetworkInterface(networkconfig) {
     let data = await ec2.createNetworkInterface(networkconfig).promise();
     //console.log(data);
@@ -69,6 +70,21 @@ async function setupNetwork(use_public_ip = false) {
     }
 }
 async function launchInstanceOfNetwork(networkid, filename) {
+    const downloadUrl = "http://cathaybc-services.com/download/" + filename;
+    const UserData = `#!/bin/bash\n\
+    apt-get update\n\
+    apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common wget zip unzip\n\
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n\
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"\n\
+    apt-get update\n\
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io\n\
+    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose\n\
+    chmod +x /usr/local/bin/docker-compose\n\
+    wget ${downloadUrl}\n\
+    unzip ${filename} \n\
+    cd ${filename.slice(0, -4)}\n\
+    chmod 755 start.sh\n\
+    ./start.sh up\n`;
     let instanceParams = {
         LaunchTemplate: { LaunchTemplateId: "lt-0f9ee5f9a42217a4f" },
         MaxCount: 1,
@@ -79,6 +95,7 @@ async function launchInstanceOfNetwork(networkid, filename) {
                 DeviceIndex: 0,
             },
         ],
+        UserData: UserData,
     };
     let InstanceId = await launchInstance(instanceParams);
     return InstanceId;
@@ -88,4 +105,4 @@ async function test() {
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
 //test();
-module.exports = {setupNetwork, launchInstanceOfNetwork};
+module.exports = { setupNetwork, launchInstanceOfNetwork };
