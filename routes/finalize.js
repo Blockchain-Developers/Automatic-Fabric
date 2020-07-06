@@ -11,7 +11,7 @@ const write = require("write");
 var cmd = require("node-cmd");
 const aws = require("../src/aws");
 const { promisify } = require("util");
-
+const axios = require('axios');
 const secretkey =
     "vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU";
 
@@ -1055,6 +1055,14 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 network.data[i].networkid,
                 network.data[i].file
             );
+            const proxykey='hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP';
+            var ports=[];
+            ports.push(data.org[i].orderer.port);
+            ports.push(data.org[i].ca.port);
+            for(var j=0;j<data.org[i].peer.length){
+              ports.push(data.org[i].peer[j].port);
+            }
+            axios.post('http://proxy.cathaybc-services.com', {subdomain:data.org[i].name, ports:ports})
         }
 
         network = JSON.stringify(network);
@@ -1062,6 +1070,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             req.params.id,
             network,
         ]);
+
         await queryAsync("delete from pending where id=?", req.params.id);
         res.send("Success");
     } else {
