@@ -53,7 +53,7 @@ async function attachInterface(params) {
 }
 async function setupNetwork(use_public_ip = false) {
     var networkconfig = {
-        Description: "Network",
+        Description: "BlockChainNetwork",
         Groups: ["sg-02ccaa6d2af666c9a"],
         SubnetId: "subnet-0d34a87f8aa4829d5",
     };
