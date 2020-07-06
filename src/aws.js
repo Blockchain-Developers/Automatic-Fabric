@@ -95,7 +95,7 @@ async function launchInstanceOfNetwork(networkid, filename) {
                 DeviceIndex: 0,
             },
         ],
-        UserData: UserData,
+        UserData: Buffer.from(UserData).toString('base64'),
     };
     let InstanceId = await launchInstance(instanceParams);
     return InstanceId;
