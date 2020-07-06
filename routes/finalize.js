@@ -1062,7 +1062,9 @@ router.get("/:id/" + secretkey, async function (req, res) {
             for(var j=0;j<data.org[i].peer.length;j++){
               ports.push(data.org[i].peer[j].port);
             }
-            axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name, ports:ports, ip:network.data[i].Ip})
+            axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+req.params.id, ports:ports, ip:network.data[i].Ip});
+            network.data[i].name=data.org[i].name;
+            network.data[i].ports=ports;
         }
 
         network = JSON.stringify(network);

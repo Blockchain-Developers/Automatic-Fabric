@@ -49,6 +49,7 @@ var confirmRouter = require('./routes/confirm')
 var finalizeRouter = require('./routes/finalize')
 var settingsRouter = require('./routes/settings')
 var adminRouter = require('./routes/admin')
+var connectionRouter = require('./routes/connection')
 
 app.use('/', indexRouter);
 app.use('/new', newRouter);
@@ -58,6 +59,7 @@ app.use('/confirm', confirmRouter);
 app.use('/finalize', finalizeRouter);
 app.use('/settings', settingsRouter);
 app.use('/admin', adminRouter);
+app.use('/connection', connectionRouter);
 app.use('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');
