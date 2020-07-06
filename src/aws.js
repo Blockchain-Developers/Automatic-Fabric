@@ -137,7 +137,7 @@ async function setupNetwork(use_public_ip = false) {
     // attachInterface(attachparams);
     // deleteNetworkInterface("eni-0108653ef100950f3");
 }
-async function launchInstanceOfNetwork(networkid) {
+async function launchInstanceOfNetwork(networkid, filename) {
     let instanceParams = {
         LaunchTemplate: { LaunchTemplateId: "lt-0f9ee5f9a42217a4f" },
         MaxCount: 1,
