@@ -82,8 +82,8 @@ async function launchInstanceOfNetwork(networkid, filename) {
     chmod +x /usr/local/bin/docker-compose\n\
     wget ${downloadUrl}\n\
     unzip ${filename} \n\
-    cd ${filename.slice(0, -4)}\n\
     chmod 755 start.sh\n\
+    ./start.sh generate\n\
     ./start.sh up\n`;
     let instanceParams = {
         LaunchTemplate: { LaunchTemplateId: "lt-0f9ee5f9a42217a4f" },
