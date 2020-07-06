@@ -156,4 +156,5 @@ async function test() {
     let { networkid, PrivateIpAddress } = await setupNetwork();
     let InstanceId = await launchInstanceOfNetwork(networkid);
 }
+//test();
 module.exports = {setupNetwork, launchInstanceOfNetwork};
