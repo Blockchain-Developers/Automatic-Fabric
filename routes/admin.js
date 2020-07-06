@@ -18,8 +18,8 @@ router.get('/', async function(req, res, next) {
 });
 router.post('/new', async function(req, res, next){
   const username=req.body.username;
-  const password=randomstring.generate(8);
-  var hashedPassword = passwordHash.generate(password);
+  var password=await randomstring.generate(8);
+  var hashedPassword = await passwordHash.generate(password);
   con.query('select * from users where username=?', username, function(err, results){
     if(!results.length){
       con.query('insert into users set username=?, passwordhash=?, role=?, status=?', [username, hashedPassword, 'User','Active']);
