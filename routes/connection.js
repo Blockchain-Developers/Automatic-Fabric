@@ -15,6 +15,7 @@ const con = mysql.createConnection({
 router.get('/:id', async function(req, res, next) {
   con.query('select data from networks where id=?', req.params.id, function(err, results){
     var data=JSON.parse(results[0].data);
+    data=data.data;
     var found=0;
     var ports='';
     var location='';
@@ -22,16 +23,16 @@ router.get('/:id', async function(req, res, next) {
       if(data[i].name==req.session.user){
         found=1;
         location=data[i].name+'-'+req.params.id+'.cathaybc-services.com';
-        ports='Orderer\n';
+        ports='Orderer: ';
         ports+=data[i].ports[0];
-        ports+='\n';
-        ports+='CA\n';
+        ports+='; ';
+        ports+='CA: ';
         ports+=data[i].ports[1];
-        ports+='\n';
-        ports+='Peers\n';
+        ports+='; ';
+        ports+='Peers: ';
         for(var j=2;j<data[i].ports.length;j++){
           ports+=data[i].ports[j];
-          ports+='\n';
+          ports+=', ';
         }
       }
     }
