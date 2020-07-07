@@ -966,9 +966,9 @@ router.get("/:id/" + secretkey, async function (req, res) {
                     cryptodir +
                     '/crypto-config"'
             );
-        let err,
-            dat,
-            stderr = await cmdgetAsync(
+        let err1,
+            dat1,
+            stderr1 = await cmdgetAsync(
                 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
                     cryptodir +
                     '/channel-artifacts;configtxgen -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock  ./files/temp/' +
