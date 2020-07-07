@@ -82,7 +82,7 @@ async function launchInstanceOfNetwork(networkid, filename) {
     chmod +x /usr/local/bin/docker-compose\n\
     wget ${downloadUrl}\n\
     unzip ${filename} \n\
-    curl -sSL http://bit.ly/2ysbOFE | bash -s -- 1.4.4 1.4.4 0.4.21 -d -s\n\
+    curl -sSL http://bit.ly/2ysbOFE | bash -s -- -d -s\n\
     chmod 755 start.sh\n\
     ./start.sh up\n`;
     let instanceParams = {

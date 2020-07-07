@@ -12,7 +12,7 @@ CLI_TIMEOUT=10
 CLI_DELAY=3
 SYS_CHANNEL="system-channel"
 LANGUAGE=golang
-IMAGETAG="1.4.4"
+IMAGETAG="latest"
 CONSENSUS_TYPE="etcdraft"
 COMPOSE_FILES="-f docker-compose.yaml"
 
