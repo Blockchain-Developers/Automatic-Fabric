@@ -84,7 +84,6 @@ async function launchInstanceOfNetwork(networkid, filename) {
     unzip ${filename} \n\
     curl -sSL http://bit.ly/2ysbOFE | bash -s -- 1.4.4 1.4.4 0.4.21 -d -s\n\
     chmod 755 start.sh\n\
-    ./start.sh generate\n\
     ./start.sh up\n`;
     let instanceParams = {
         LaunchTemplate: { LaunchTemplateId: "lt-0f9ee5f9a42217a4f" },
