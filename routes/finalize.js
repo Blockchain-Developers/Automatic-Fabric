@@ -1086,6 +1086,20 @@ router.get("/:id/" + secretkey, async function (req, res) {
             axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+req.params.id, ports:ports, ip:network.data[i].Ip});
             network.data[i].name=data.org[i].name;
             network.data[i].ports=ports;
+
+            network.data[i].keyfiles = [];
+            var tmpkeyfilename=await randomstring.generate(64);
+            await fs.copyFileSync(
+                "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem ",
+                './public/download/'+tmpkeyfilename+'.pem'
+            );
+            network.data[i].keyfiles.push(tmpkeyfilename);
+            tmpkeyfilename=await randomstring.generate(64);
+            await write.sync(
+                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
+                './public/download/'+tmpkeyfilename+'.pem'
+            );
+            network.data[i].keyfiles.push(tmpkeyfilename);
         }
 
         network = JSON.stringify(network);

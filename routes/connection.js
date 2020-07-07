@@ -19,6 +19,8 @@ router.get('/:id', async function(req, res, next) {
     var found=0;
     var ports='';
     var location='';
+    var orderertls='';
+    var orgtls='';
     for(var i=0;i<data.length;i++){
       if(data[i].name==req.session.user){
         found=1;
@@ -34,10 +36,12 @@ router.get('/:id', async function(req, res, next) {
           ports+=data[i].ports[j];
           ports+=', ';
         }
+        orderertls=data[i].keyfiles[0];
+        orgtls=data[i].keyfiles[1];
       }
     }
     if(found){
-      res.render('connection-data', {location:location, ports:ports})
+      res.render('connection-data', {location:location, ports:ports, orderertls:orderertls, orgtls:orgtls})
     }
     else{
       createError(403);
