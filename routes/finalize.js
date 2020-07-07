@@ -939,6 +939,10 @@ router.get("/:id/" + secretkey, async function (req, res) {
             "files/temp/" + cryptodir + "/crypto-config.yaml",
             cryptoyaml
         );
+        await write.sync(
+            "files/temp/" + cryptodir + "/configtx.yaml",
+            configtxyaml
+        );
 
         var network = { id: req.params.id, data: [] };
 
@@ -971,7 +975,9 @@ router.get("/:id/" + secretkey, async function (req, res) {
             stderr1 = await cmdgetAsync(
                 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
                     cryptodir +
-                    '/channel-artifacts;configtxgen -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock  ./files/temp/' +
+                    '/channel-artifacts;configtxgen -configPath ./files/temp/' +
+                    cryptodir +
+                    '/configtx.yaml -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
                     cryptodir +
                     '/channel-artifacts/genesis.block'
             );
