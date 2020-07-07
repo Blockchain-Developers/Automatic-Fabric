@@ -977,7 +977,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
                     cryptodir +
                     '/channel-artifacts;configtxgen -configPath ./files/temp/' +
                     cryptodir +
-                    '/configtx.yaml -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
+                    '/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
                     cryptodir +
                     '/channel-artifacts/genesis.block'
             );
