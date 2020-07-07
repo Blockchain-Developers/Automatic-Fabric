@@ -193,7 +193,7 @@ function dckryamlgen(data, orgnumber) {
             '052",';
         dckr +=
             '"CORE_PEER_GOSSIP_BOOTSTRAP=' +
-            data.org[orgnumber].name +
+            data.org[orgnumber].peer[i].name +
             "." +
             data.org[orgnumber].name +
             ".com:" +
@@ -209,7 +209,7 @@ function dckryamlgen(data, orgnumber) {
                 (port_num + orgnumber).toString() +
                 '051",';
         }
-        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber] + 'MSP"';
+        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber].name + 'MSP"';
         dckr += "],";
 
         dckr += '"volumes": ['; // volumes_[
