@@ -966,6 +966,15 @@ router.get("/:id/" + secretkey, async function (req, res) {
                     cryptodir +
                     '/crypto-config"'
             );
+        let err,
+            dat,
+            stderr = await cmdgetAsync(
+                'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
+                    cryptodir +
+                    '/channel-artifacts;configtxgen -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock  ./files/temp/' +
+                    cryptodir +
+                    '/channel-artifacts/genesis.block'
+            );
         for (var i = 0; i < data.orgcount; i++) {
             var zip = new AdmZip();
             await zip.addLocalFolder(
@@ -985,6 +994,12 @@ router.get("/:id/" + secretkey, async function (req, res) {
                     data.org[i].name +
                     ".com",
                 "crypto-config/peerOrganizations/" + data.org[i].name + ".com"
+            );
+            await zip.addLocalFolder(
+                "files/temp/" +
+                    cryptodir +
+                    "/channel-artifacts/",
+                "channel-artifacts/"
             );
             await zip.addFile(
                 "docker-compose.yaml",
