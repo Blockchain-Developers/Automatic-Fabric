@@ -1095,7 +1095,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             );
             network.data[i].keyfiles.push(tmpkeyfilename);
             tmpkeyfilename=await randomstring.generate(64);
-            await write.sync(
+            await fs.copyFileSync(
                 "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
                 'public/download/'+tmpkeyfilename+'.pem'
             );
