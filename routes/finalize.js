@@ -1090,7 +1090,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             network.data[i].keyfiles = [];
             var tmpkeyfilename=await randomstring.generate(64);
             await fs.copyFileSync(
-                "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem ",
+                "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
                 'public/download/'+tmpkeyfilename+'.pem'
             );
             network.data[i].keyfiles.push(tmpkeyfilename);
