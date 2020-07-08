@@ -1100,6 +1100,18 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 'public/download/'+tmpkeyfilename+'.pem'
             );
             network.data[i].keyfiles.push(tmpkeyfilename);
+            tmpkeyfilename=await randomstring.generate(64);
+            await fs.copyFileSync(
+                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem",
+                'public/download/'+tmpkeyfilename+'.pem'
+            );
+            network.data[i].keyfiles.push(tmpkeyfilename);
+            tmpkeyfilename=await randomstring.generate(64);
+            await fs.copyFileSync(
+                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/priv_sk",
+                'public/download/'+tmpkeyfilename+'_sk'
+            );
+            network.data[i].keyfiles.push(tmpkeyfilename);
         }
 
         network = JSON.stringify(network);

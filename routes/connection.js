@@ -21,6 +21,8 @@ router.get('/:id', async function(req, res, next) {
     var location='';
     var orderertls='';
     var orgtls='';
+    var adminsigncert='';
+    var adminkeystore='';
     for(var i=0;i<data.length;i++){
       if(data[i].name==req.session.user){
         found=1;
@@ -38,10 +40,12 @@ router.get('/:id', async function(req, res, next) {
         }
         orderertls=data[i].keyfiles[0];
         orgtls=data[i].keyfiles[1];
+        adminsigncert=data[i].keyfiles[2];
+        adminkeystore=data[i].keyfiles[3];
       }
     }
     if(found){
-      res.render('connection-data', {location:location, ports:ports, orderertls:orderertls, orgtls:orgtls})
+      res.render('connection-data', {location:location, ports:ports, orderertls:orderertls, orgtls:orgtls, adminsigncert:adminsigncert, adminkeystore:adminkeystore})
     }
     else{
       createError(403);
