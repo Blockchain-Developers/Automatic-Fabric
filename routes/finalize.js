@@ -1091,13 +1091,13 @@ router.get("/:id/" + secretkey, async function (req, res) {
             var tmpkeyfilename=await randomstring.generate(64);
             await fs.copyFileSync(
                 "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem ",
-                './public/download/'+tmpkeyfilename+'.pem'
+                'public/download/'+tmpkeyfilename+'.pem'
             );
             network.data[i].keyfiles.push(tmpkeyfilename);
             tmpkeyfilename=await randomstring.generate(64);
             await write.sync(
                 "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
-                './public/download/'+tmpkeyfilename+'.pem'
+                'public/download/'+tmpkeyfilename+'.pem'
             );
             network.data[i].keyfiles.push(tmpkeyfilename);
         }
