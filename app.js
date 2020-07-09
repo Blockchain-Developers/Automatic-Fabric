@@ -51,6 +51,8 @@ var settingsRouter = require('./routes/settings');
 var adminRouter = require('./routes/admin');
 var connectionRouter = require('./routes/connection');
 var networkRouter = require('./routes/network');
+var channelRouter = require('./routes/channel');
+var chaincodeRouter = require('./routes/chaincode');
 
 app.use('/', indexRouter);
 app.use('/new', newRouter);
@@ -62,6 +64,8 @@ app.use('/settings', settingsRouter);
 app.use('/admin', adminRouter);
 app.use('/connection', connectionRouter);
 app.use('/network', networkRouter);
+app.use('/channel', channelRouter);
+app.use('/chaincode', chaincodeRouter);
 app.use('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');
