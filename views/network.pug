@@ -1,0 +1,69 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
+  title Cathay BC Services
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+.container.text-center(style='width: 60%;padding: 0px;margin-top: 5%;')
+  h2 Cathay BC Services CP
+  p Network #{id} Management
+  .table-responsive.table-borderless
+    table.table.table-sm
+      tbody
+        tr
+          td.text-center(style='width:160px;')
+            a.btn.btn-light(role='button' href='/channel/'+id+'/new' style='width:150px;margin-bottom:10px;') New Channel
+            a.btn.btn-light(role='button' href='/chaincode/'+id+'/new' style='width:150px;margin-bottom:10px;') New Chaincode
+            a.btn.btn-light(role='button' href='/connection/'+id style='width:150px;margin-bottom:10px;') Connection
+          td.text
+            .table-responsive.table-bordered
+              table.table.table-sm
+                tbody
+                  tr
+                    td.text-left
+                      h5 Pending Channels
+                  if(data)
+                    if(data.pending-channels)
+                      each val, index in data.pending-channels
+                        tr
+                          td.text-left(width='50%') #{val.id}
+                          td.text-center
+                            a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px') Join
+                            a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px') Deny
+                            a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
+                  tr
+                    td.text-left
+                      h5 Pending Channels
+                  if(data)
+                    if(data.pending-chaincodes)
+                      each val, index in data.pending-chaincodes
+                        tr
+                          td.text-left(width='50%') #{val.name} (channel-id: #{val.channel})
+                          td.text-center
+                            a.btn.btn-primary(role='button' href='/chaincode/'+id+'/install/'+val.channel+'/'+val.name style='width:90px') Install
+                            a.btn.btn-danger(role='button' href='/chaincode/'+id+'/deny/'+val.channel+'/'+val.name style='width:90px;margin-left:5px') Deny
+                            a.btn.btn-dark(role='button' href='/chaincode/'+id+'/details/'+val.channel+'/'+val.name style='width:90px;margin-left:5px') Details
+
+                  tr
+                    td.text-left
+                      h5(style='margin-top:10px') Existing Channels
+                  if(data)
+                    if(data.channels)
+                      each val, index in data.channels
+                        tr
+                          td.text-left(width='50%')
+                            a(href='/channel/'+id+'/'+val.id target='_blank') #{val.id} (#{val.label})
+
+                  tr
+                    td.text-left
+                      h5(style='margin-top:10px') Deployed Chaincodes
+                  if(data)
+                    if(data.channels)
+                      each val, index in data.channels
+                        tr
+                          td.text-left(width='50%')
+                            a(href='/chaincode/'+id+'/'+val.channel+'/'+val.name target='_blank') #{val.name} (channel-id: #{val.channel})
+
+script(src='assets/js/jquery.min.js')
+script(src='assets/bootstrap/js/bootstrap.min.js')

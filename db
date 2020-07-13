@@ -17,3 +17,10 @@ networks
 id varchar(100)
 data text
 created timestamp
+
+channels
+-----------------
+id varchar(100)
+data text
+created timestamp
+status varchar(200)
