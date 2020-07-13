@@ -3,10 +3,10 @@ head
   meta(charset='utf-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
   title Cathay BC Services
-  link(rel='stylesheet' href='assets/bootstrap/css/bootstrap.min.css')
-  link(rel='stylesheet' href='assets/css/styles.css')
-script(src='assets/js/jquery.min.js')
-script(src='assets/bootstrap/js/bootstrap.min.js')
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+script(src='/assets/js/jquery.min.js')
+script(src='/assets/bootstrap/js/bootstrap.min.js')
 script.
   $(function() {
   $(document).on('click', '.btn-add', function(e) {
@@ -28,15 +28,15 @@ div
         h1.text-center(style='margin-top: 20px;') Channel Participants
         #fields.control-group
           div(style='text-align:center')
-            label.control-label(for='field1') Please input collaborators
+            label.control-label(for='field1') Please select participants
           .controls
             form(role='form' autocomplete='off' method='post' enctype='application.json' action='/new')
               input.form-control(name='fields' type='text' size='3' required='' style='margin-top:10px' value=user readonly='')
               .entry.input-group.col-xs-3
-                input.form-control(name='fields' type='text' placeholder='Collaborator' size='3' required='' style='margin-top:10px')
-                select(name='fields' required='' style='margin-top:10px')
-                  each val, index in orgs
-                    option(value=val.name) #{val.name}
+                //input.form-control(name='fields' type='text' placeholder='Collaborator' size='3' required='' style='margin-top:10px')
+                select.browser-default.custom-select.mb-3(name='fields' required='' style='margin-top:10px;width:577px')
+                  each val,index in orgs
+                    option(value=val) #{val}
                 span.input-group-btn
                   button.btn.btn-danger.btn-remove(type='button' style='width:40px;margin-top:10px') -
               if(message)

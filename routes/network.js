@@ -12,10 +12,12 @@ const con = mysql.createConnection({
 /* GET home page. */
 
 router.get('/:id', async function(req, res, next) {
-  con.query('select data, from users where username=?', req.session.user, function(err, results){
+  con.query('select data from users where username=?', req.session.user, function(err, results){
     var data={};
-    data=JSON.parse(results[0].data);
-    res.render('index', {user:req.session.user, id:req.parmas.id, data:data});
+    if(results[0]){
+        data=JSON.parse(results[0].data);
+    }
+    res.render('network', {user:req.session.user, id:req.params.id, data:data});
 
   });
 });

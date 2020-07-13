@@ -21,6 +21,7 @@ router.get("/:id/new", async function (req, res, next) {
     if(results.length){
       var data=JSON.parse(results[0].data);
       var orgs=[];
+      data=data.data;
       for(var i=0;i<data.length;i++){
         orgs.push(data[i].name);
       }
