@@ -46,7 +46,7 @@ var newRouter = require('./routes/new');
 var fillRouter = require('./routes/fill');
 var editRouter = require('./routes/edit');
 var confirmRouter = require('./routes/confirm')
-var finalizeRouter = require('./routes/finalize')
+//var finalizeRouter = require('./routes/finalize')
 var settingsRouter = require('./routes/settings')
 var adminRouter = require('./routes/admin')
 var connectionRouter = require('./routes/connection')
@@ -56,7 +56,7 @@ app.use('/new', newRouter);
 app.use('/fill', fillRouter);
 app.use('/edit', editRouter);
 app.use('/confirm', confirmRouter);
-app.use('/finalize', finalizeRouter);
+//app.use('/finalize', finalizeRouter);
 app.use('/settings', settingsRouter);
 app.use('/admin', adminRouter);
 app.use('/connection', connectionRouter);

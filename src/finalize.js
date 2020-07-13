@@ -1123,5 +1123,5 @@ async function process(id){
     } else {
         res.send("Illegal Request");
     }
-});
-module.exports =  process ;
+};
+module.exports =  {process} ;

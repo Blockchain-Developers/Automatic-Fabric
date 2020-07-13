@@ -3,7 +3,7 @@ var router = express.Router();
 var randomstring = require("randomstring");
 const axios = require('axios');
 const mysql = require('mysql');
-const finalize = require("../src/finalize");
+const finalize = require('../src/finalize');
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'nodejs',
