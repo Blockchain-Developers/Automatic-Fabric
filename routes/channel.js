@@ -29,7 +29,31 @@ router.get("/:id/new", async function (req, res, next) {
     }
   });
 });
-router.post("/", async function (req, res, next) {
-  console.log(req.body);
+router.post("/:id/new", async function (req, res, next) {
+  var str = "";
+  for (var i = 0; i < req.body.fields.length; i++) {
+      if (i != 0) {
+          str += ", ";
+      }
+      str += "'";
+      str += req.body.fields[i];
+      str += "'";
+  }
+  let err,
+      results = await queryAsync(
+          "select username from users where role=? and username in (" +
+              str +
+              ") and finished like ?",
+          ["user", network.params.id]
+      );
+  var participants=[];
+  for(var i=0;i<results.length;i++){
+    participants.push(results[0].username);
+  }
+  var channelid = await randomstring.generate({
+      length: 10,
+      charset: "numeric",
+  });
+
 });
 module.exports = router;
