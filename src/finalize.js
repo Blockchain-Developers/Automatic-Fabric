@@ -9,11 +9,10 @@ const YAML = require("json-to-pretty-yaml");
 const insertLine = require("insert-line");
 const write = require("write");
 var cmd = require("node-cmd");
-const aws = require("../src/aws");
+const aws = require("./aws");
 const { promisify } = require("util");
 const axios = require('axios');
-const secretkey =
-    "vNcbBNSVkVqzt9z2G643UA03VTC4z9es9tKbcAv4qtMcgV3oIdFutbHdAtWU";
+const proxykey='hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP';
 
 const mysql = require("mysql");
 const con = mysql.createConnection({
@@ -918,11 +917,11 @@ function configtxyamlgen(data) {
     return configtxyaml;
 }
 
-router.get("/:id/" + secretkey, async function (req, res) {
+async function process(id){
     let err,
         results = await queryAsync(
             "select data from pending where id=?",
-            req.params.id
+            id
         );
     if (results.length) {
         var data = results[0].data;
@@ -944,7 +943,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             configtxyaml
         );
 
-        var network = { id: req.params.id, data: [] };
+        var network = { id: id, data: [] };
 
         var extra_hosts = "    extra_hosts:\n";
         for (var i = 0; i < data.orgcount; i++) {
@@ -1053,7 +1052,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
             var it = 0;
             var userdata = JSON.parse(results[0].data);
             for (var j = 0; j < userdata.pending.length; j++) {
-                if (userdata.pending[j].id == req.params.id) {
+                if (userdata.pending[j].id == id) {
                     it = j;
                 }
             }
@@ -1062,7 +1061,7 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 userdata.finished = [];
             }
             userdata.finished.push({
-                id: req.params.id,
+                id: id,
             });
             userdata = JSON.stringify(userdata);
             await queryAsync("update users set data=? where username=?", [
@@ -1076,14 +1075,13 @@ router.get("/:id/" + secretkey, async function (req, res) {
                 network.data[i].networkid,
                 network.data[i].file
             );
-            const proxykey='hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP';
             var ports=[];
             ports.push(data.org[i].orderer.port);
             ports.push(data.org[i].ca.port);
             for(var j=0;j<data.org[i].peer.length;j++){
               ports.push(data.org[i].peer[j].port);
             }
-            axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+req.params.id, ports:ports, ip:network.data[i].Ip});
+            axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+id, ports:ports, ip:network.data[i].Ip});
             network.data[i].name=data.org[i].name;
             network.data[i].ports=ports;
 
@@ -1116,14 +1114,14 @@ router.get("/:id/" + secretkey, async function (req, res) {
 
         network = JSON.stringify(network);
         await queryAsync("insert into networks set id=?, data=?", [
-            req.params.id,
+            id,
             network,
         ]);
 
-        await queryAsync("delete from pending where id=?", req.params.id);
+        await queryAsync("delete from pending where id=?", id);
         res.send("Success");
     } else {
         res.send("Illegal Request");
     }
-});
-module.exports = router;
+};
+module.exports =  {process} ;

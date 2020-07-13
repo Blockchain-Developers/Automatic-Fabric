@@ -3,6 +3,7 @@ var router = express.Router();
 var randomstring = require("randomstring");
 const axios = require('axios');
 const mysql = require('mysql');
+const finalize = require('../src/finalize');
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'nodejs',
@@ -44,7 +45,7 @@ router.get('/:id', async function(req, res, next) {
         }
       }
       if(check_finalize){
-        axios.get('http://localhost:3000/finalize/'+req.params.id+'/'+secretkey);
+        finalize.process(req.params.id);
         res.redirect('/');
       }
       else{
