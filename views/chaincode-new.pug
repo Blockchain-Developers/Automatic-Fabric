@@ -7,19 +7,6 @@ head
   link(rel='stylesheet' href='/assets/css/styles.css')
 script(src='/assets/js/jquery.min.js')
 script(src='/assets/bootstrap/js/bootstrap.min.js')
-script.
-  $(function() {
-  $(document).on('click', '.btn-add', function(e) {
-  e.preventDefault();
-  var currentEntry = $('.controls .entry:last');
-  var newEntry = $(currentEntry.clone()).insertAfter('.entry:last');
-  newEntry.find('input').val('');
-  }).on('click', '.btn-remove', function(e) {
-  $(this).parents('.entry:first').remove();
-  e.preventDefault();
-  return false;
-  });
-  });
 div
   .container(style='width: 80%;height: 60%;')
     .row
@@ -30,15 +17,14 @@ div
           div(style='text-align:center')
             label.control-label(for='field1') Please select participants
           .controls
-            form(role='form' autocomplete='off' method='post' enctype='application.json' action='/channel/'+id+'/new')
+            form(role='form' autocomplete='off' method='post' enctype='multipart/form-data' action='/chaincode/new')
               input.form-control(name='fields' type='text' size='3' required='' style='margin-top:10px' value=user readonly='')
               .entry.input-group.col-xs-3
-                //input.form-control(name='fields' type='text' placeholder='Collaborator' size='3' required='' style='margin-top:10px')
-                select.browser-default.custom-select.mb-3(name='fields' required='' style='margin-top:10px;width:577px')
-                  each val,index in orgs
+                input.form-control(name='chaincodename' type='text' placeholder='chaincode name' size='3' required='' style='margin-top:10px')
+                input(name='chaincodefile' type='file' accept='zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed' required='')
+                select.browser-default.custom-select.mb-3(name='channel' required='' style='margin-top:10px;width:577px')
+                  each val,index in channels
                     option(value=val) #{val}
-                span.input-group-btn
-                  button.btn.btn-danger.btn-remove(type='button' style='width:40px;margin-top:10px') -
               if(message)
                 p(style='color:red;text-align:center;margin-top:10px') #{message}
               div(style='text-align:center')

@@ -24,20 +24,21 @@ head
                     td.text-left
                       h5 Pending Channels
                   if(data)
-                    if(data.pending-channels)
-                      each val, index in data.pending-channels
-                        tr
-                          td.text-left(width='50%') #{val.id}
-                          td.text-center
-                            a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px') Join
-                            a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px') Deny
-                            a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
+                    if(data.pendingchannels)
+                      each val, index in data.pendingchannels
+                        if(val.network==id)
+                          tr
+                            td.text-left(width='50%') #{val.id}
+                            td.text-center
+                              a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px') Join
+                              a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px') Deny
+                              a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
                   tr
                     td.text-left
                       h5 Pending Channels
                   if(data)
-                    if(data.pending-chaincodes)
-                      each val, index in data.pending-chaincodes
+                    if(data.pendingchaincodes)
+                      each val, index in data.pendingchaincodes
                         tr
                           td.text-left(width='50%') #{val.name} (channel-id: #{val.channel})
                           td.text-center
@@ -51,9 +52,10 @@ head
                   if(data)
                     if(data.channels)
                       each val, index in data.channels
-                        tr
-                          td.text-left(width='50%')
-                            a(href='/channel/'+id+'/'+val.id target='_blank') #{val.id} (#{val.label})
+                        if(val.network==id)
+                          tr
+                            td.text-left(width='50%')
+                              a(href='/channel/'+id+'/'+val.id target='_blank') #{val.id} (#{val.label})
 
                   tr
                     td.text-left
