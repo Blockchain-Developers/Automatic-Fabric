@@ -30,7 +30,7 @@ head
                           tr
                             td.text-left(width='50%') #{val.id}
                             td.text-center
-                              a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Join
+                              a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px'+(val.decision==0?'':';pointer-events: none;background-color:#EEEEEE;color:gray')) Join
                               a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Deny
                               a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
                   tr
