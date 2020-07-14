@@ -47,12 +47,37 @@ router.post("/:id/new", async function (req, res, next) {
           ["user", network.params.id]
       );
   var data=[];
+  var participants=[];
   for(var i=0;i<results.length;i++){
-    data.push({participants:results[0].username, decision:1});
+    participants.push(results[0].username);
+    data.push({participant:results[0].username, decision:1});
   }
   var channelid = await randomstring.generate({
       length: 10,
       charset: "numeric",
+  });
+  str = "";
+  for (var i = 0; i < participants.length; i++) {
+     if (i != 0) {
+         str += ", ";
+     }
+     str += "'";
+     str += participants[i];
+     str += "'";
+  }
+  con.query("select data, username from users where role=? and username in (" +str + ")", 'user', function(err, results){
+    for(var i=0;i<results.length;i++){
+      var data={};
+      if(results[i]){
+          data=JSON.parse(results[0].data);
+      }
+      if(!data.pending-channels){
+        data.pending-channels=[];
+      }
+      data.pending-channels.push(channelid);
+      data=JSON.stringify(data);
+      con.query('update users set data=? where username=?', [data, results[i].username])
+    }
   });
   con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending'])
 });
