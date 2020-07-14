@@ -20,7 +20,7 @@
     "express-session": "^1.17.1",
     "fabric-network": "^1.4.10",
     "fs-extra": "^9.0.1",
-    "http-errors": "~1.6.3",
+    "http-errors": "~1.8.0",
     "insert-line": "^1.1.0",
     "json-to-pretty-yaml": "^1.2.2",
     "morgan": "~1.9.1",
