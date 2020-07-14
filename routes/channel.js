@@ -70,12 +70,12 @@ router.post("/:id/new", async function (req, res, next) {
     for(var i=0;i<results.length;i++){
       var data={};
       if(results[i]){
-          data=JSON.parse(results[0].data);
+          data=JSON.parse(results[i].data);
       }
       if(!data.pendingchannels){
         data.pendingchannels=[];
       }
-      data.pendingchannels.push({id:channelid, network:req.params.id});
+      data.pendingchannels.push({id:channelid, network:req.params.id, decision:0});
       data=JSON.stringify(data);
       con.query('update users set data=? where username=?', [data, results[i].username])
     }
@@ -86,18 +86,28 @@ router.post("/:id/new", async function (req, res, next) {
 });
 router.get("/:networkid/:what/:channelid", async function (req, res, next) {
   let err, results = await queryAsync(
-          "select username from users where role=? and username =? and data like ?",
-          [req.session.user, "user", '%'+req.params.networkid+'%']
+          "select username, data from users where role=? and username =? and data like ?",
+          ['user', req.session.user, '%'+req.params.networkid+'%']
       );
   if(results.length){
     if(req.params.what=='join'){
+      var data={};
+      data=JSON.parse(results[0].data);
+      for(var i=0;i<data.pendingchannels.length;i++){
+        if(data.pendingchannels[i].id==req.params.channelid){
+          data.pendingchannels[i].decision=1;
+        }
+      }
+      data=JSON.stringify(data);
+      con.query('update users set data=? where username=?', [data, req.session.user])
+
       con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
         var data=JSON.parse(results[0].data);
         var cnt=0;
         var orgs=[];
         for(var i=0;i<data.length;i++){
           if(data[i].participant==req.session.user){
-            data[i].participant=1;
+            data[i].decision=1;
           }
           if(data[i].decision){
             cnt++;
@@ -107,19 +117,29 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
           }
         }
         if(cnt==data.length){
-          utilities.startchannel(orgs, req.params.networkid, req.params.channelid)
+          utilities.startchannel(orgs, req.params.networkid, req.session.user)
         }
         data=JSON.stringify(data);
         con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
       });
     }else if(req.params.what=='deny') {
+      var data={};
+      data=JSON.parse(results[0].data);
+      for(var i=0;i<data.pendingchannels.length;i++){
+        if(data.pendingchannels[i].id==req.params.channelid){
+          data.pendingchannels[i].decision=1;
+        }
+      }
+      data=JSON.stringify(data);
+      con.query('update users set data=? where username=?', [data, results[0].username])
+      
       con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
         var data=JSON.parse(results[0].data);
         var cnt=0;
         var orgs=[];
         for(var i=0;i<data.length;i++){
           if(data[i].participant==req.session.user){
-            data[i].participant=2;
+            data[i].decision=2;
           }
           if(data[i].decision){
             cnt++;
@@ -135,7 +155,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
         con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
       });
     }else if(req.params.what=='details'){
-      
+
     }
     res.redirect('/network/'+req.params.networkid)
   }
