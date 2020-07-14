@@ -87,7 +87,7 @@ router.post("/:id/new", async function (req, res, next) {
 router.get("/:networkid/:what/:channelid", async function (req, res, next) {
   let err, results = await queryAsync(
           "select username from users where role=? and username =? and data like ?",
-          [req.session.user, "user", '%'+req.params.networkid+'%']
+          ['user', req.session.user, '%'+req.params.networkid+'%']
       );
   if(results.length){
     if(req.params.what=='join'){
@@ -97,7 +97,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
         var orgs=[];
         for(var i=0;i<data.length;i++){
           if(data[i].participant==req.session.user){
-            data[i].participant=1;
+            data[i].decision=1;
           }
           if(data[i].decision){
             cnt++;
@@ -119,7 +119,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
         var orgs=[];
         for(var i=0;i<data.length;i++){
           if(data[i].participant==req.session.user){
-            data[i].participant=2;
+            data[i].decision=2;
           }
           if(data[i].decision){
             cnt++;
