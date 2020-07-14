@@ -43,14 +43,14 @@ router.post("/:id/new", async function (req, res, next) {
       results = await queryAsync(
           "select username from users where role=? and username in (" +
               str +
-              ") and finished like ?",
-          ["user", network.params.id]
+              ") and data like ?",
+          ["user", '%'+req.params.id+'%']
       );
   var data=[];
   var participants=[];
   for(var i=0;i<results.length;i++){
-    participants.push(results[0].username);
-    data.push({participant:results[0].username, decision:1});
+    participants.push(results[i].username);
+    data.push({participant:results[i].username, decision:1});
   }
   var channelid = await randomstring.generate({
       length: 10,
@@ -71,14 +71,16 @@ router.post("/:id/new", async function (req, res, next) {
       if(results[i]){
           data=JSON.parse(results[0].data);
       }
-      if(!data.pending-channels){
-        data.pending-channels=[];
+      if(!data.pendingchannels){
+        data.pendingchannels=[];
       }
-      data.pending-channels.push(channelid);
+      data.pendingchannels.push({id:channelid, network:req.params.id});
       data=JSON.stringify(data);
       con.query('update users set data=? where username=?', [data, results[i].username])
     }
   });
+  data=JSON.stringify(data);
   con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending'])
+  res.redirect('/network/'+req.params.id)
 });
 module.exports = router;
