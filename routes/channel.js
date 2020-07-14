@@ -46,14 +46,14 @@ router.post("/:id/new", async function (req, res, next) {
               ") and finished like ?",
           ["user", network.params.id]
       );
-  var participants=[];
+  var data=[];
   for(var i=0;i<results.length;i++){
-    participants.push(results[0].username);
+    data.push({participants:results[0].username, decision:1});
   }
   var channelid = await randomstring.generate({
       length: 10,
       charset: "numeric",
   });
-
+  con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending'])
 });
 module.exports = router;
