@@ -30,8 +30,8 @@ head
                           tr
                             td.text-left(width='50%') #{val.id}
                             td.text-center
-                              a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px'+(val.decision==0?'':';pointer-events: none;')) Join
-                              a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px') Deny
+                              a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Join
+                              a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Deny
                               a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
                   tr
                     td.text-left
@@ -42,9 +42,9 @@ head
                         tr
                           td.text-left(width='50%') #{val.name} (channel-id: #{val.channel})
                           td.text-center
-                            a.btn.btn-primary(role='button' href='/chaincode/'+id+'/install/'+val.channel+'/'+val.name style='width:90px') Install
-                            a.btn.btn-danger(role='button' href='/chaincode/'+id+'/deny/'+val.channel+'/'+val.name style='width:90px;margin-left:5px') Deny
-                            a.btn.btn-dark(role='button' href='/chaincode/'+id+'/details/'+val.channel+'/'+val.name style='width:90px;margin-left:5px') Details
+                            a.btn.btn-primary(role='button' href='/chaincode/'+id+'/install/'+val.channel+'/'+val.name style='width:90px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Install
+                            a.btn.btn-danger(role='button' href='/chaincode/'+id+'/deny/'+val.channel+'/'+val.name style='width:90px;margin-left:5px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Deny
+                            a.btn.btn-dark(role='button' href='/chaincode/'+id+'/details/'+val.channel+'/'+val.name style='width:90px;margin-left:5px'+(val.decision==0?'':';pointer-events: none;color:#EEEEEE')) Details
 
                   tr
                     td.text-left
