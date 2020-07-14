@@ -1086,7 +1086,6 @@ async function process(id){
             network.data[i].ports=ports;
 
             network.data[i].keyfiles = [];
-            /*
             var tmpkeyfilename=await randomstring.generate(64);
             await fs.copyFileSync(
                 "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
@@ -1110,7 +1109,7 @@ async function process(id){
                 "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/priv_sk",
                 'public/download/'+tmpkeyfilename+'_sk'
             );
-            */
+            
             network.data[i].keyfiles.push(tmpkeyfilename);
         }
 
