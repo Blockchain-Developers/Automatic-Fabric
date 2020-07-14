@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www -e DEBUG=false",
+    "debug": "node ./bin/www -e DEBUG=true"
   },
   "dependencies": {
-    "aws-sdk": "^2.686.0",
     "adm-zip": "^0.4.14",
+    "aws-sdk": "^2.686.0",
     "axios": "^0.19.2",
     "blob": "^0.1.0",
     "cookie-parser": "~1.4.4",

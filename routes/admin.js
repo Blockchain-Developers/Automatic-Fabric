@@ -1,33 +1,39 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 var randomstring = require("randomstring");
-var passwordHash = require('password-hash');
-const mysql = require('mysql');
+var passwordHash = require("password-hash");
+const mysql = require("mysql");
+const { promisify } = require("util");
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'nodejs',
-  password: 'nodejspassword',
-  database: 'users',
-  multipleStatements: true
+    host: "mariadb",
+    user: "nodejs",
+    password: "nodejspassword",
+    database: "users",
+    multipleStatements: true,
 });
-
+const queryAsync = promisify(con.query).bind(con);
 /* GET home page. */
 
-router.get('/', async function(req, res, next) {
-  res.render('admin')
+router.get("/", function (req, res, next) {
+    res.render("admin");
 });
-router.post('/new', async function(req, res, next){
-  const username=req.body.username;
-  var password=await randomstring.generate(8);
-  var hashedPassword = await passwordHash.generate(password);
-  con.query('select * from users where username=?', username, function(err, results){
-    if(!results.length){
-      con.query('insert into users set username=?, passwordhash=?, role=?, status=?', [username, hashedPassword, 'User','Active']);
-      res.render('user-created', {password:password})
+router.post("/new", async function (req, res, next) {
+    const username = req.body.username;
+    let password = await randomstring.generate(8);
+    let hashedPassword = await passwordHash.generate(password);
+    let err,
+        results = await queryAsync(
+            "select * from users where username=?",
+            username
+        );
+    if (!results.length) {
+        await queryAsync(
+            "insert into users set username=?, passwordhash=?, role=?, status=?",
+            [username, hashedPassword, "User", "Active"]
+        );
+        res.render("user-created", { password: password });
+    } else {
+        res.redirect("back");
     }
-    else{
-      res.redirect('back')
-    }
-  });
 });
 module.exports = router;
