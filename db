@@ -21,6 +21,14 @@ created timestamp
 channels
 -----------------
 id varchar(100)
+network varchar(100)
 data text
 created timestamp
-status varchar(200)
+status varchar(100)
+
+chaincode
+-----------------
+name varchar(100)
+channelid varchar(100)
+filename varchar(100)
+created timestamp

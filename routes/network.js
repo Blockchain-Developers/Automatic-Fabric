@@ -13,7 +13,7 @@ const con = mysql.createConnection({
 
 router.get('/:id', async function(req, res, next) {
   con.query('select data from users where username=?', req.session.user, function(err, results){
-    var data={};
+    var data=[];
     if(results[0]){
         data=JSON.parse(results[0].data);
     }
