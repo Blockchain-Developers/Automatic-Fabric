@@ -1,7 +1,7 @@
 const { Wallet } = require("fabric-network");
 const fs = require("fs");
 
-//this will generate ccp string
+//this will generate cpp file
 function ccpgen(
     org,
     orgtlspath,
