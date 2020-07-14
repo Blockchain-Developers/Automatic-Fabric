@@ -93,13 +93,13 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
     if(req.params.what=='join'){
       var data={};
       data=JSON.parse(results[0].data);
-      for(var i=0;i<data.length;i++){
+      for(var i=0;i<data.pendingchannels.length;i++){
         if(data.pendingchannels[i].id==req.params.channelid){
           data.pendingchannels[i].decision=1;
         }
       }
       data=JSON.stringify(data);
-      con.query('update users set data=? where username=?', [data, results[i].username])
+      con.query('update users set data=? where username=?', [data, req.session.user])
 
       con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
         var data=JSON.parse(results[0].data);
@@ -117,7 +117,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
           }
         }
         if(cnt==data.length){
-          utilities.startchannel(orgs, req.params.networkid, req.params.channelid)
+          utilities.startchannel(orgs, req.params.networkid, req.session.user)
         }
         data=JSON.stringify(data);
         con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
@@ -125,13 +125,13 @@ router.get("/:networkid/:what/:channelid", async function (req, res, next) {
     }else if(req.params.what=='deny') {
       var data={};
       data=JSON.parse(results[0].data);
-      for(var i=0;i<data.length;i++){
+      for(var i=0;i<data.pendingchannels.length;i++){
         if(data.pendingchannels[i].id==req.params.channelid){
           data.pendingchannels[i].decision=1;
         }
       }
       data=JSON.stringify(data);
-      con.query('update users set data=? where username=?', [data, results[i].username])
+      con.query('update users set data=? where username=?', [data, results[0].username])
       
       con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
         var data=JSON.parse(results[0].data);
