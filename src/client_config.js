@@ -1,4 +1,4 @@
-const { Wallet } = require("fabric-network");
+const { Wallets } = require("fabric-network");
 const fs = require("fs");
 
 //this will generate cpp file
