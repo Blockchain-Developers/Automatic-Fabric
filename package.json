@@ -18,7 +18,7 @@
     "express-fileupload": "^1.1.7-alpha.3",
     "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
-    "fabric-network": "^1.4.10",
+    "fabric-network": "^2.1.0",
     "fs-extra": "^9.0.1",
     "http-errors": "~1.8.0",
     "insert-line": "^1.1.0",

@@ -28,7 +28,7 @@ function ccpgen(
                     "ssl-target-name-override": fulldomain,
                 },
                 tlsCACerts: {
-                    pem: fs.readFileSync(orderertlspath),
+                    pem: fs.readFileSync(orderertlspath).toString(),
                 },
             },
         },
@@ -39,7 +39,7 @@ function ccpgen(
                     "ssl-target-name-override": fulldomain,
                 },
                 tlsCACerts: {
-                    pem: fs.readFileSync(orgtlspath),
+                    pem: fs.readFileSync(orgtlspath).toString(),
                 },
             },
         },
@@ -60,7 +60,7 @@ async function walletgen(
     const x509Identity = {
         credentials: {
             certificate: pub.toString(),
-            privateKey: priv, //need to be bytestring
+            privateKey: priv.toString(), //need to be bytestring
         },
         mspId: `${org.name}MSP`,
         type: "X.509",
