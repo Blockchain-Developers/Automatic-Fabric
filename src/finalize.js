@@ -1092,7 +1092,7 @@ async function process(id){
               "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
               network.data[i].networkid,
               "public/download",
-              network.data[i].ccpfile+'.json'
+              network.data[i].ccpfile+'.ccp'
             )
             network.data[i].walletfile = await randomstring.generate(64);
             client_config.walletgen(
