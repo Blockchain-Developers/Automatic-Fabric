@@ -8,6 +8,7 @@ function ccpgen(
     orderertlspath,
     networkid,
     ccpPath,
+    filename,
     domain = "cathaybc-services.com"
 ) {
     let fulldomain = `${org.name}-${networkid}.${domain}`;
@@ -17,7 +18,7 @@ function ccpgen(
         organizations: {
             [`${org.name}`]: {
                 mspid: `${org.name}MSP`,
-                peers: org.peer.map( (peer) => peer.name)
+                peers: org.peer.map((peer) => peer.name),
             },
         },
         orderers: {
@@ -27,7 +28,7 @@ function ccpgen(
                     "ssl-target-name-override": fulldomain,
                 },
                 tlsCACerts: {
-                    pem: fs.readFileSync(orderertlspath)
+                    pem: fs.readFileSync(orderertlspath),
                 },
             },
         },
@@ -38,16 +39,22 @@ function ccpgen(
                     "ssl-target-name-override": fulldomain,
                 },
                 tlsCACerts: {
-                    pem: fs.readFileSync(orgtlspath)
+                    pem: fs.readFileSync(orgtlspath),
                 },
-            }
+            },
         },
     };
-    fs.writeFileSync(ccpPath+`/connection-${orgname}.json`,JSON.stringify(ccp));
+    fs.writeFileSync(ccpPath + "/" + filename, JSON.stringify(ccp));
 }
 
 //this will generate the wallet file
-async function walletgen(org,walletDir,privatekeypath,publickeypath){
+async function walletgen(
+    org,
+    walletDir,
+    filename,
+    privatekeypath,
+    publickeypath
+) {
     let pub = fs.readFileSync(publickeypath);
     let priv = fs.readFileSync(privatekeypath);
     const x509Identity = {
@@ -56,9 +63,9 @@ async function walletgen(org,walletDir,privatekeypath,publickeypath){
             privateKey: priv, //need to be bytestring
         },
         mspId: `${org.name}MSP`,
-        type: 'X.509'
-    }
+        type: "X.509",
+    };
     const wallet = await Wallets.newFileSystemWallet(walletDir);
-    await wallet.put('admin', x509Identity);
+    await wallet.put(filename, x509Identity);
 }
-module.exports = {ccpgen,walletgen};
+module.exports = { ccpgen, walletgen };
