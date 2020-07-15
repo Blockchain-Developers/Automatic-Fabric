@@ -17,35 +17,19 @@ router.get('/:id', async function(req, res, next) {
     var data=JSON.parse(results[0].data);
     data=data.data;
     var found=0;
-    var ports='';
     var location='';
-    var orderertls='';
-    var orgtls='';
-    var adminsigncert='';
-    var adminkeystore='';
+    var ccpfile='';
+    var walletfile=''
     for(var i=0;i<data.length;i++){
       if(data[i].name==req.session.user){
         found=1;
         location=data[i].name+'-'+req.params.id+'.cathaybc-services.com';
-        ports='Orderer: ';
-        ports+=data[i].ports[0];
-        ports+='; ';
-        ports+='CA: ';
-        ports+=data[i].ports[1];
-        ports+='; ';
-        ports+='Peers: ';
-        for(var j=2;j<data[i].ports.length;j++){
-          ports+=data[i].ports[j];
-          ports+=', ';
-        }
-        orderertls=data[i].keyfiles[0];
-        orgtls=data[i].keyfiles[1];
-        adminsigncert=data[i].keyfiles[2];
-        adminkeystore=data[i].keyfiles[3];
+        ccpfile=data[i].ccpfile;
+        walletfile=data[i].walletfile;
       }
     }
     if(found){
-      res.render('connection-data', {location:location, ports:ports, orderertls:orderertls, orgtls:orgtls, adminsigncert:adminsigncert, adminkeystore:adminkeystore})
+      res.render('connection-data', {location:location, ccpfile:ccpfile, walletfile:walletfile})
     }
     else{
       createError(403);

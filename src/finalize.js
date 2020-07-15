@@ -10,6 +10,7 @@ const insertLine = require("insert-line");
 const write = require("write");
 var cmd = require("node-cmd");
 const aws = require("./aws");
+const client_config = require("./client_config.js")
 const { promisify } = require("util");
 const axios = require('axios');
 const proxykey='hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP';
@@ -1084,33 +1085,23 @@ async function process(id){
             axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+id, ports:ports, ip:network.data[i].Ip});
             network.data[i].name=data.org[i].name;
             network.data[i].ports=ports;
-
-            network.data[i].keyfiles = [];
-            var tmpkeyfilename=await randomstring.generate(64);
-            await fs.copyFileSync(
-                "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
-                'public/download/'+tmpkeyfilename+'.pem'
-            );
-            network.data[i].keyfiles.push(tmpkeyfilename);
-            tmpkeyfilename=await randomstring.generate(64);
-            await fs.copyFileSync(
-                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
-                'public/download/'+tmpkeyfilename+'.pem'
-            );
-            network.data[i].keyfiles.push(tmpkeyfilename);
-            tmpkeyfilename=await randomstring.generate(64);
-            await fs.copyFile(
-                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem",
-                'public/download/'+tmpkeyfilename+'.pem'
-            );
-            network.data[i].keyfiles.push(tmpkeyfilename);
-            tmpkeyfilename=await randomstring.generate(64);
-            await fs.copyFile(
-                "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/priv_sk",
-                'public/download/'+tmpkeyfilename+'_sk'
-            );
-            
-            network.data[i].keyfiles.push(tmpkeyfilename);
+            network.data[i].ccpfile = await randomstring.generate(64);
+            client_config.ccpgen(
+              data.org[i],
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
+              "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
+              network.data[i].networkid,
+              "public/download",
+              network.data[i].ccpfile+'.json'
+            )
+            network.data[i].walletfile = await randomstring.generate(64);
+            client_config.walletgen(
+              data.org[i],
+              "public/download",
+              network.data[i].walletfile,
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/priv_sk",
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem"
+            )
         }
 
         network = JSON.stringify(network);

@@ -14,25 +14,13 @@ div
         h1.text-center(style='margin-top: 20px;') ConnectionProfile
         p Location:
         p #{location}
-        p Ports:
-        p #{ports}
-        p Orderer TLS Pubkey
-        a(href='/download/'+orderertls+'.pem') Download pem
+        p Common Connection Profile
+        a(href='/download/'+ccpfile+'.json') Download CCP File
         br
         br
         br
-        p Org TLS Pubkey
-        a(href='/download/'+orgtls+'.pem') Download pem
-        br
-        br
-        br
-        p Org Admin Signcert
-        a(href='/download/'+adminsigncert+'.pem') Download pem
-        br
-        br
-        br
-        p Org Admin Keystore
-        a(href='/download/'+adminkeystore+'_sk') Download secretkey
+        p Wallet File
+        a(href='/download/'+walletfile+'.id') Download Wallet File
         br
         br
         br
