@@ -95,7 +95,7 @@ function dckryamlgen(data, orgnumber) {
             data.org[orgnumber].name +
             '.com": null,';
     }
-    dckr += '"orderer.' + data.org[orgnumber].name + 'ord.com": null'; // orderer
+    dckr += '"orderer.ord-' + data.org[orgnumber].name + '.com": null'; // orderer
     dckr += "},"; // volumes_}
     dckr += '"networks": {"testnet": null},'; //networks
     dckr += '"services": {'; // services_{
@@ -131,9 +131,9 @@ function dckryamlgen(data, orgnumber) {
         data.org[orgnumber].name +
         '.com/tls/:/var/hyperledger/orderer/tls",';
     dckr +=
-        '"orderer.' +
+        '"orderer.ord-' +
         data.org[orgnumber].name +
-        'ord.com:/var/hyperledger/production/orderer"],'; // volumes_}
+        '.com:/var/hyperledger/production/orderer"],'; // volumes_}
 
     dckr += '"ports": ["' + (port_num + i).toString() + '050:7050"]'; // ports
 
