@@ -11,8 +11,6 @@ script(src='/assets/bootstrap/js/bootstrap.min.js')
 script(type='text/javascript').
   $(function () {
   var generateKeys = async function () {
-  document.getElementById('generate').disabled = true;
-  document.getElementById('generate').textContent = 'Generating Keypair';
   var dt = new Date();
   var time = -(dt.getTime());
   const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
@@ -36,7 +34,11 @@ script(type='text/javascript').
   };
   $('#sendkey').hide();
   $('#downloadkey').hide();
-  $('#generate').click(generateKeys);
+  $('#generate').click(function(){
+  document.getElementById('generate').disabled = true;
+  document.getElementById('generate').textContent = 'Generating Keypair';
+  generateKeys
+  });
   });
 div
   .container(style='width: 80%;height: 60%;')
