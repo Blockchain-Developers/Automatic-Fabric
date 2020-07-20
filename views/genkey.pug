@@ -20,8 +20,7 @@ script(type='text/javascript').
   var time = -(dt.getTime());
   const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
   userIds: [{name: '#{user}', email: '#{user}@cathaybcservices.com'}],
-  rsaBits: 2048,
-  //curve: 'ed25519',
+  curve: 'ed25519',
   passphrase: ''
   });
   $('#time-report').text('.');
@@ -51,7 +50,7 @@ div
       .col-md-6(style='max-width: 60%;min-width: 60%;text-align:center')
         h1.text-center(style='margin-top: 20px;') Keypair Generator
         p(style='text-align:justify')
-          | This is your first login, a RSA keypair will be generated. Please download and save the key securely, since the key is unrecoverable and will result in deny of access to certain services in the event of key loss. The key generation process is done locally with only the public key sent to our servers
+          | This is your first login, a keypair will be generated. Please download and save the key securely, since the key is unrecoverable and will result in deny of access to certain services in the event of key loss. The key generation process is done locally with only the public key sent to our servers
         button#generate.btn.btn-light Generate Keypair
         a#downloadkey.btn-lg.btn-secondary(role='button' href='' style='') Download Private Key
         br
