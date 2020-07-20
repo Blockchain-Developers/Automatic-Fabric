@@ -5,6 +5,8 @@ passwordhash varchar(100)
 role varchar(100)
 status varchar(100)
 data text
+keyexists bool default 0
+pubkey text
 
 pending
 -----------------

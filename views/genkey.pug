@@ -1,0 +1,55 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
+  title Cathay BC Services
+  link(rel='stylesheet' href='assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='assets/css/styles.css')
+script(src='assets/bootstrap/js/bootstrap.min.js')
+script(src='assets/js/jquery.min.js')
+script(src='assets/js/openpgp.min.js')
+script(type='text/javascript').
+  $(function () {
+  var generateKeys = async function () {
+  document.getElementById('generate').disabled = true;
+  document.getElementById('generate').textContent = 'Generating Keypair';
+  var dt = new Date();
+  var time = -(dt.getTime());
+  const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
+  userIds: [{name: '#{user}', email: '#{user}@cathaybcservices.com'}],
+  rsaBits: 4096,
+  passphrase: ''
+  });
+  $('#time-report').text('.');
+  dt = new Date();
+  time += (dt.getTime());
+  $('#time-report').text('Generated in ' + time + ' ms');
+  $('#pubkey').val(publicKeyArmored);
+  var prvkey = privateKeyArmored;
+  var data = new Blob([prvkey], {type: 'application/octet-stream'});
+  var url = window.URL.createObjectURL(data);
+  document.getElementById('downloadkey').href = url;
+  $('#generate').hide();
+  $('#sendkey').show();
+  $('#downloadkey').show();
+  };
+  $('#sendkey').hide();
+  $('#downloadkey').hide();
+  $('#generate').click(generateKeys);
+  });
+div
+  .container(style='width: 80%;height: 60%;')
+    .row
+      .col-md-6(style='max-width: 20%;margin-top: 98px')
+      .col-md-6(style='max-width: 60%;min-width: 60%;text-align:center')
+        h1.text-center(style='margin-top: 20px;') Keypair Generator
+        p(style='text-align:justify')
+          | This is your first login, a RSA keypair will be generated. Please download and save the key securely, since the key is unrecoverable and will result in deny of access to certain services in the event of key loss. The key generation process is done locally with only the public key sent to our servers
+        button#generate.btn.btn-light Generate Keypair
+        a#downloadkey.btn-lg.btn-secondary(role='button' href='' style='') Download Private Key
+        br
+        small#time-report
+        form(role='form' autocomplete='off' method='post' enctype='application/json' action='/writekey')
+          textarea#pubkey.form-control(name='pubkey' readonly='' hidden='')
+          button#sendkey.btn.btn-danger(type='submit' style='margin-top:20px') I have securely saved the key
+        .col-md-6(style='max-width: 20%;margin-top: 80px')

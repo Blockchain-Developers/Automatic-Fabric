@@ -66,7 +66,11 @@ app.use('/connection', connectionRouter);
 app.use('/network', networkRouter);
 app.use('/channel', channelRouter);
 app.use('/chaincode', chaincodeRouter);
-app.use('/logout', function(req, res, next){
+app.post('/writekey', function(req, res, next){
+  con.query('update users set pubkey=?, keyexists=1 where keyexists=0 && username=?', [req.body.pubkey, req.session.user]);
+  res.redirect('/');
+})
+app.get('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');
 });

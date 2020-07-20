@@ -12,13 +12,17 @@ const con = mysql.createConnection({
 /* GET home page. */
 
 router.get('/', async function(req, res, next) {
-  con.query('select data, role from users where username=?', req.session.user, function(err, results){
+  con.query('select data, role, keyexists from users where username=?', req.session.user, function(err, results){
     var data={};
     var pending={};
     var finished={};
     if(results[0].role=='user'){
-      data=JSON.parse(results[0].data);
-      res.render('index', {user:req.session.user, isadmin:req.session.admin, data:data});
+      if(results[0].keyexists){
+        data=JSON.parse(results[0].data);
+        res.render('index', {user:req.session.user, isadmin:req.session.admin, data:data});
+      } else{
+        res.render('gen-key', {user:req.session.user});
+      }
     }
     else{
       con.query('select id, created from pending;select id, created from networks',[] ,function(err, results){
