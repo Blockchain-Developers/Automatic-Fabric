@@ -21,7 +21,7 @@ router.get('/', async function(req, res, next) {
         data=JSON.parse(results[0].data);
         res.render('index', {user:req.session.user, isadmin:req.session.admin, data:data});
       } else{
-        res.render('gen-key', {user:req.session.user});
+        res.render('genkey', {user:req.session.user});
       }
     }
     else{

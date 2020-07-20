@@ -3,11 +3,11 @@ head
   meta(charset='utf-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
   title Cathay BC Services
-  link(rel='stylesheet' href='assets/bootstrap/css/bootstrap.min.css')
-  link(rel='stylesheet' href='assets/css/styles.css')
-script(src='assets/bootstrap/js/bootstrap.min.js')
-script(src='assets/js/jquery.min.js')
-script(src='assets/js/openpgp.min.js')
+  link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+  link(rel='stylesheet' href='/assets/css/styles.css')
+script(src='/assets/js/jquery.min.js')
+script(src='/assets/js/openpgp.min.js')
+script(src='/assets/bootstrap/js/bootstrap.min.js')
 script(type='text/javascript').
   $(function () {
   var generateKeys = async function () {
@@ -17,7 +17,8 @@ script(type='text/javascript').
   var time = -(dt.getTime());
   const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
   userIds: [{name: '#{user}', email: '#{user}@cathaybcservices.com'}],
-  rsaBits: 4096,
+  rsaBits: 2048,
+  //curve: 'ed25519',
   passphrase: ''
   });
   $('#time-report').text('.');
