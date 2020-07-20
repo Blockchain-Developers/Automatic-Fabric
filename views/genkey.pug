@@ -10,6 +10,11 @@ script(src='/assets/js/openpgp.min.js')
 script(src='/assets/bootstrap/js/bootstrap.min.js')
 script(type='text/javascript').
   $(function () {
+  var changeattribute = function() {
+  document.getElementById('generate').disabled = true;
+  document.getElementById('generate').textContent = 'Generating Keypair';
+  return;
+  }
   var generateKeys = async function () {
   var dt = new Date();
   var time = -(dt.getTime());
@@ -34,10 +39,9 @@ script(type='text/javascript').
   };
   $('#sendkey').hide();
   $('#downloadkey').hide();
-  $('#generate').click(function(){
-  document.getElementById('generate').disabled = true;
-  document.getElementById('generate').textContent = 'Generating Keypair';
-  generateKeys
+  $('#generate').click(async function(){
+  await changeattribute();
+  generateKeys();
   });
   });
 div
