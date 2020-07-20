@@ -81,14 +81,14 @@ div
         h1.text-center(style='margin-top: 20px;') Signing Portal
         p(style='text-align:justify')
           | Please verify the following command and upload your key for signing. The process will be done locally.
-        form(role='form' autocomplete='off' method='post' enctype='application/json' action='/writekey')
+        form(role='form' autocomplete='off' method='post' enctype='application/json' action= url)
           button#command-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px')
             small View Command
-          textarea#command.form-control.collapse(name='command' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px') test
+          textarea#command.form-control.collapse(name='command' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px') #{command}
           br
           button#serversig-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px')
             small View Server Signature
-          textarea#serversig.form-control.collapse(name='serversig' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px')
+          textarea#serversig.form-control.collapse(name='serversig' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px') #{serversig}
           textarea#orgsig.form-control(name='orgsig' readonly='' style='background-color:white;margin-bottom:0px;min-height:200px')
           br
           button#send.btn.btn-danger(type='submit' style='margin-bottom:-20px') Send Command
