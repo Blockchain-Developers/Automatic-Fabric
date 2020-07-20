@@ -19,9 +19,6 @@ script(type='text/javascript').
   var signcommand = async function() {
   $('#send').hide();
   $('#command').hide();
-  $('#command-button').hide();
-  $('#serversig').hide();
-  $('#serversig-button').hide();
   $('#prvkey').hide();
   $('#prvkey-button').hide();
   var dt = new Date();
@@ -54,6 +51,7 @@ script(type='text/javascript').
   }
   }
   });
+  $('#command').show();
   $('#send').hide();
   $('#orgsig').hide();
   $('#sign').hide();
@@ -66,12 +64,6 @@ script(type='text/javascript').
   $('#prvkey-button').click(function() {
   $('#prvkey').toggle();
   });
-  $('#command-button').click(function() {
-  $('#command').toggle();
-  });
-  $('#serversig-button').click(function() {
-  $('#serversig').toggle();
-  });
   });
 div
   .container(style='width: 80%;height: 60%;')
@@ -81,19 +73,15 @@ div
         h1.text-center(style='margin-top: 20px;') Signing Portal
         p(style='text-align:justify')
           | Please verify the following command and upload your key for signing. The process will be done locally.
-        form(role='form' autocomplete='off' method='post' enctype='application/json' action= url)
-          button#command-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px')
-            small View Command
-          textarea#command.form-control.collapse(name='command' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px') #{command}
+        form(role='form' autocomplete='off' method='post' enctype='application/json' action=url)
+          textarea#command.form-control.collapse(name='command' readonly='' style='background-color:white;margin-bottom:0px;min-height:200px') #{command}
           br
-          button#serversig-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px')
-            small View Server Signature
-          textarea#serversig.form-control.collapse(name='serversig' readonly='' style='background-color:white;margin-bottom:20px;min-height:200px') #{serversig}
+          textarea#serversig.form-control.collapse(name='serversig' readonly='' hidden='' style='background-color:white;margin-bottom:20px;min-height:200px') #{serversig}
           textarea#orgsig.form-control(name='orgsig' readonly='' style='background-color:white;margin-bottom:0px;min-height:200px')
           br
           button#send.btn.btn-danger(type='submit' style='margin-bottom:-20px') Send Command
         p#dropzone(style='padding-top:50px;padding-bottom:50px;border-style: solid;margin-bottom:20px') Please drag your keyfile here
-        button#prvkey-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px')
+        button#prvkey-button.btn.btn-light(type='button' style='margin-bottom:10px;width:180px;margin-top:-20px')
           small View Local Key
         textarea#prvkey.form-control.collapse(name='prvkey' disabled='' readonly='' style='min-height:200px;margin-bottom:20px')
         br
