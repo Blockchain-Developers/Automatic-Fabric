@@ -209,7 +209,8 @@ function dckryamlgen(data, orgnumber) {
                 (port_num + orgnumber).toString() +
                 '051",';
         }
-        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber].name + 'MSP"';
+        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber].name + 'MSP",';
+        dckr += '"CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/' + data.org[orgnumber].name + '.com/users/Admin@' + data.org[orgnumber].name +'.com/msp",';
         dckr += "],";
 
         dckr += '"volumes": ['; // volumes_[
@@ -1077,6 +1078,7 @@ async function process(id){
                 network.data[i].file
             );
             var ports=[];
+            ports.push(80);
             ports.push(data.org[i].orderer.port);
             ports.push(data.org[i].ca.port);
             for(var j=0;j<data.org[i].peer.length;j++){
