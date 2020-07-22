@@ -361,7 +361,7 @@ function configtxyamlgen(data) {
         Application: { V2_0: true },
     };
     let ApplicationDefaults = {
-        Organizations: "",
+        Organizations: [],
         Policies: {
             Readers: { Type: "ImplicitMeta", Rule: '"ANY Readers"' },
             Writers: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
@@ -392,7 +392,7 @@ function configtxyamlgen(data) {
             AbsoluteMaxBytes: "99 MB",
             PreferredMaxBytes: "512 KB",
         },
-        Organizations: "",
+        Organizations: [],
         Policies: {
             Readers: { Type: "ImplicitMeta", Rule: '"ANY Readers"' },
             Writers: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
