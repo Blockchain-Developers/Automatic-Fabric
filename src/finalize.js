@@ -338,22 +338,22 @@ function configtxyamlgen(data) {
         Policies: {
             Readers: {
                 Type: "Signature",
-                Rule: `\"OR(\'${org.name}MSP.admin\',\'${org.name}MSP.peer\',\'${org.name}MSP.client\')\"`,
+                Rule: `OR(\'${org.name}MSP.admin\',\'${org.name}MSP.peer\',\'${org.name}MSP.client\')`,
             },
             Writers: {
                 Type: "Signature",
-                Rule: `\"OR(\'${org.name}MSP.admin\',\'${org.name}MSP.client\')\"`,
+                Rule: `OR(\'${org.name}MSP.admin\',\'${org.name}MSP.client\')`,
             },
             Admins: {
                 Type: "Signature",
-                Rule: `\"OR(\'${org.name}MSP.admin\')\"`,
+                Rule: `OR(\'${org.name}MSP.admin\')`,
             },
             Endorsement: {
                 Type: "Signature",
-                Rule: `\"OR(\'${org.name}MSP.peer\')\"`,
+                Rule: `OR(\'${org.name}MSP.peer\')`,
             },
         },
-        AnchorPeers: [{ Host: `${org.name}.com`, Port: "7051" }],
+        AnchorPeers: [{ Host: `${org.name}.com`, Port: 7051 }],
     }));
     let Capabilities = {
         Channel: { V2_0: true },
@@ -363,16 +363,16 @@ function configtxyamlgen(data) {
     let ApplicationDefaults = {
         Organizations: [],
         Policies: {
-            Readers: { Type: "ImplicitMeta", Rule: '"ANY Readers"' },
-            Writers: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
-            Admins: { Type: "ImplicitMeta", Rule: '"MAJORITY Admins"' },
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" },
             LifecycleEndorsement: {
                 Type: "ImplicitMeta",
-                Rule: '"MAJORITY Endorsement"',
+                Rule: "MAJORITY Endorsement",
             },
             Endorsement: {
                 Type: "ImplicitMeta",
-                Rule: '"ANY Endorsement"', //default to use "MAJORITY Endorsement"
+                Rule: "ANY Endorsement", //default to use "MAJORITY Endorsement"
             },
         },
         Capabilities: Capabilities.Application,
@@ -381,30 +381,30 @@ function configtxyamlgen(data) {
         EtcdRaft: {
             Consenters: data.org.map((org) => ({
                 Host: `ord-${org.name}.com`,
-                Port: "7050",
+                Port: 7050,
                 ClientTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
                 ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
             })),
         },
         BatchTimeout: "2s",
         BatchSize: {
-            MaxMessageCount: "10",
+            MaxMessageCount: 10,
             AbsoluteMaxBytes: "99 MB",
             PreferredMaxBytes: "512 KB",
         },
         Organizations: [],
         Policies: {
-            Readers: { Type: "ImplicitMeta", Rule: '"ANY Readers"' },
-            Writers: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
-            Admins: { Type: "ImplicitMeta", Rule: '"MAJORITY Admins"' },
-            BlockValidation: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" },
+            BlockValidation: { Type: "ImplicitMeta", Rule: "ANY Writers" },
         },
     };
     let ChannelDefaults = {
         Policies: {
-            Readers: { Type: "ImplicitMeta", Rule: '"ANY Readers"' },
-            Writers: { Type: "ImplicitMeta", Rule: '"ANY Writers"' },
-            Admins: { Type: "ImplicitMeta", Rule: '"MAJORITY Admins"' }
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" }
         },
         Capabilities : Capabilities.Channel
     };
