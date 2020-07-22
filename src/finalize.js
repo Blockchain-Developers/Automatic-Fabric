@@ -80,7 +80,7 @@ function cryptoyamlgen(data) {
     crypto = crypto + "]}";
     // console.log(crypto);
     const cryptojson = JSON.parse(crypto);
-    const cryptoyaml = YAML.stringify(cryptojson);
+    const cryptoyaml = YAML.safeDump(cryptojson);
     return cryptoyaml;
 }
 
@@ -217,7 +217,7 @@ function dckryamlgen(data, orgnumber) {
             data.org[orgnumber].name +
             ".com/users/Admin@" +
             data.org[orgnumber].name +
-            '.com/msp",';
+            '.com/msp"';
         dckr += "],";
 
         dckr += '"volumes": ['; // volumes_[
