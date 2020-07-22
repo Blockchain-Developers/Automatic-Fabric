@@ -5,7 +5,6 @@ var randomstring = require("randomstring");
 var CronJob = require("cron").CronJob;
 const fs = require("fs");
 const fsExtra = require("fs-extra");
-//const YAML = require("json-to-pretty-yaml");
 const YAML = require("js-yaml");
 const insertLine = require("insert-line");
 const write = require("write");
@@ -306,7 +305,6 @@ function dckryamlgen(data, orgnumber) {
     dckr += "}"; // HEAD_}
 
     const dckrjson = JSON.parse(dckr);
-    //const dckryaml = YAML.stringify(dckrjson);
     const dckryaml = YAML.safeDump(dckrjson);
     return dckryaml;
 }
