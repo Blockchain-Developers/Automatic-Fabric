@@ -82,8 +82,88 @@ function cryptoyamlgen(data) {
     const cryptoyaml = YAML.safeDump(cryptojson);
     return cryptoyaml;
 }
-
 function dckryamlgen(data, orgnumber) {
+    let Org = data.org[orgnumber];
+    let dckr = Object.assign(
+        {},
+        {
+            version: "2",
+            volumes: Object.assign(
+                {},
+                ...Org.peer.map((peer) => ({
+                    [`${peer.name}.${Org.name}.com`]: null,
+                })),
+                { [`orderer.ord-${Org.name}.com`]: null }
+            ),
+            networks: { test: null },
+            services: {
+                [`ca.${Org.name}.com`]: {
+                    image: "hyperledger/fabric-ca:$IMAGE_TAG",
+                    environment: [
+                        "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server",
+                        `FABRIC_CA_SERVER_CA_NAME=ca-${Org.name}`,
+                        "FABRIC_CA_SERVER_TLS_ENABLED=true",
+                        `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.${Org.name}.com-cert.pem`,
+                        "FABRIC_CA_SERVER_PORT=7054",
+                    ],
+                    ports: ["7054:7054"],
+                    command:
+                        "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
+                    volumes: [
+                        `../organizations/fabric-ca/${Org.name}:/etc/hyperledger/fabric-ca-server`,
+                    ],
+                    container_name: `ca_${Org.name}`,
+                    networks: ["test"],
+                },
+                [`orderer.ord-${Org.name}.com`]: {
+                    extends: {
+                        file: "base/node-base.yaml",
+                        service: "orderer-base",
+                    },
+                    environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
+                    container_name: `orderer.ord-${Org.name}.com`,
+                    networks: ["test"],
+                    volumes: [
+                        "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
+                        `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                        `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                        `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                    ],
+                    ports: ["7050:7050"],
+                },
+            },
+        },
+        ...Org.peer.map((peer) => ({
+            [`${peer.name}.${Org.name}.com`]: {
+                container_name: `${peer.name}.${Org.name}.com`,
+                extends: {
+                    file: "base/node-base.yaml",
+                    service: "peer-base",
+                },
+                environment: [
+                    `CORE_PEER_ID=${peer.name}.${Org.name}.com`,
+                    `CORE_PEER_ADDRESS=${peer.name}.${Org.name}.com:7051`,
+                    `CORE_PEER_LISTENADDRESS=0.0.0.0:7051`,
+                    `CORE_PEER_CHAINCODEADDRESS=${peer.name}.${Org.name}.com:7052`,
+                    `CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052`,
+                    `CORE_PEER_GOSSIP_EXTERNALENDPOINT=${peer.name}.${Org.name}.com:7051`,
+                    `CORE_PEER_GOSSIP_BOOTSTRAP=${peer.name}.${Org.name}.com:7051`,
+                    `CORE_PEER_LOCALMSPID=Org1MSP`,
+                ],
+                volumes: [
+                    "/var/run/:/host/var/run",
+                    `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/msp:/etc/hyperledger/fabric/msp`,
+                    `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/tls:/etc/hyperledger/fabric/tls`,
+                    `${peer.name}.${Org.name}.com:/var/hyperledger/production`,
+                ],
+                ports: ["7051:7051"],
+                networks: ["test"],
+            },
+        }))
+    );
+    return YAML.safeDump(dckr);
+}
+function olddckryamlgen(data, orgnumber) {
     let dckr;
     dckr = '{"version": "2",'; // HEAD_{
     dckr += '"volumes": {'; // volumes_{
@@ -359,7 +439,7 @@ function configtxyamlgen(data) {
         Application: { V2_0: true },
     };
     let ApplicationDefaults = {
-        Organizations: [],
+        Organizations: null,
         Policies: {
             Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
             Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
@@ -370,7 +450,7 @@ function configtxyamlgen(data) {
             },
             Endorsement: {
                 Type: "ImplicitMeta",
-                Rule: "ANY Endorsement", //default to use "MAJORITY Endorsement"
+                Rule: "MAJORITY Endorsement",
             },
         },
         Capabilities: Capabilities.Application,
@@ -380,6 +460,8 @@ function configtxyamlgen(data) {
             Consenters: data.org.map((org) => ({
                 Host: `ord-${org.name}.com`,
                 Port: 7050,
+                //TODO
+                //This path must be change when migrate to 2.1
                 ClientTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
                 ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
             })),
@@ -390,7 +472,7 @@ function configtxyamlgen(data) {
             AbsoluteMaxBytes: "99 MB",
             PreferredMaxBytes: "512 KB",
         },
-        Organizations: [],
+        Organizations: null,
         Policies: {
             Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
             Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
@@ -402,22 +484,28 @@ function configtxyamlgen(data) {
         Policies: {
             Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
             Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
-            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" }
+            Admins: { Type: "ImplicitMeta", Rule: "ANY Admins" },
+            //defaults to MAJORITY Admins
+            //But we want to sign only once for each org to join the channel
+            //May cause some security issue ?
         },
-        Capabilities : Capabilities.Channel
+        Capabilities: Capabilities.Channel,
     };
-    let SingleOrgChannelProfiles = Object.assign({},...data.org.map((org,i) => ({
-        //profile format
-        [`${org.name}OrgChannel`] : {
-            Consortium: "SampleConsortium",
-            ...ChannelDefaults,
-            Application:{
-                ...ApplicationDefaults,
-                Organizations:[Orgs[i]],
-                Capabilities: Capabilities.Application
-            }
-        }
-    })))
+    let SingleOrgChannelProfiles = Object.assign(
+        {},
+        ...data.org.map((org, i) => ({
+            //profile format
+            [`${org.name}OrgChannel`]: {
+                Consortium: "SampleConsortium",
+                ...ChannelDefaults,
+                Application: {
+                    ...ApplicationDefaults,
+                    Organizations: [Orgs[i]],
+                    Capabilities: Capabilities.Application,
+                },
+            },
+        }))
+    );
     let configtx = {
         Organizations: [...OrdererOrgs, ...Orgs],
         Capabilities: Capabilities,
@@ -425,21 +513,22 @@ function configtxyamlgen(data) {
         Orderer: OrdererDefaults,
         Channel: ChannelDefaults,
         Profiles: {
-            MultiNodeEtcdRaft: { //system channel for genesis block generation
+            MultiNodeEtcdRaft: {
+                //system channel for genesis block generation
                 ...ChannelDefaults,
-                Orderer:{
+                Orderer: {
                     ...OrdererDefaults,
                     Organizations: OrdererOrgs,
-                    Capabilities: Capabilities.Orderer
+                    Capabilities: Capabilities.Orderer,
                 },
-                Consortiums:{
-                    SampleConsortium:{
-                        Organizations: Orgs
-                    }
-                }
+                Consortiums: {
+                    SampleConsortium: {
+                        Organizations: Orgs,
+                    },
+                },
             },
-            ...SingleOrgChannelProfiles
-        }
+            ...SingleOrgChannelProfiles,
+        },
     };
     return YAML.safeDump(configtx);
 }
