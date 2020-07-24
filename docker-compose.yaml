@@ -1,4 +1,7 @@
-version: '3.1'
+version: "3.1"
+
+networks:
+    fabric:
 
 services:
     db:
@@ -11,13 +14,23 @@ services:
             MYSQL_DATABASE: users
         ports:
             - "3306:3306"
+        networks:
+            - fabric
     nginx:
         image: nginx:latest
         restart: always
-
+        networks:
+            - fabric
+    Authenticate:
+        image: node:12.18
+        restart: always
+        networks:
+            - fabric
     automatic_fabric:
         image: node:12.18
         restart: always
+        networks:
+            - fabric
         entrypoint:
             - npm
             - run
