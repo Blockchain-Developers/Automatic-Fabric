@@ -136,8 +136,8 @@ function dckryamlgen(data, orgnumber) {
                     `CORE_PEER_CHAINCODEADDRESS=${peer.name}.${Org.name}.com:7052`,
                     `CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052`,
                     `CORE_PEER_GOSSIP_EXTERNALENDPOINT=${peer.name}.${Org.name}.com:7051`,
-                    `CORE_PEER_GOSSIP_BOOTSTRAP=${peer.name}.${Org.name}.com:7051`,
-                    `CORE_PEER_LOCALMSPID=Org1MSP`,
+                    `CORE_PEER_GOSSIP_BOOTSTRAP=${Org.peer[0].name}.${Org.name}.com:7051`,
+                    `CORE_PEER_LOCALMSPID=${Org.name}MSP`,
                 ],
                 volumes: [
                     "/var/run/:/host/var/run",
@@ -470,7 +470,7 @@ async function process(id) {
         }
 
         for (var i = 0; i < data.orgcount; i++) {
-            //for local test
+            //comment out for local test
             network.data[i].InstanceId = await aws.launchInstanceOfNetwork(
                 network.data[i].networkid,
                 network.data[i].file
@@ -482,7 +482,7 @@ async function process(id) {
             for (var j = 0; j < data.org[i].peer.length; j++) {
                 ports.push(data.org[i].peer[j].port);
             }
-            //for local test
+            //comment out for local test
             axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
                 subdomain: data.org[i].name + "-" + id,
                 ports: ports,
