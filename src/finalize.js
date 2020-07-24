@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 var AdmZip = require("adm-zip");
 var randomstring = require("randomstring");
-var CronJob = require("cron").CronJob;
+//var CronJob = require("cron").CronJob;
 const fs = require("fs");
 const fsExtra = require("fs-extra");
 const YAML = require("js-yaml");
@@ -31,16 +31,6 @@ var dkyaml = [];
 var port_num = 7;
 var peer_num = 7;
 var ca_num = 7;
-
-var cleartemp = new CronJob(
-    "0 */10 * * * *",
-    function () {
-        fsExtra.emptyDir("files/temp");
-    },
-    null,
-    true
-);
-cleartemp.start();
 
 function cryptoyamlgen(data) {
     let crypto;
@@ -84,55 +74,54 @@ function cryptoyamlgen(data) {
 }
 function dckryamlgen(data, orgnumber) {
     let Org = data.org[orgnumber];
-    let dckr = Object.assign(
-        {},
-        {
-            version: "2",
-            volumes: Object.assign(
-                {},
-                ...Org.peer.map((peer) => ({
-                    [`${peer.name}.${Org.name}.com`]: null,
-                })),
-                { [`orderer.ord-${Org.name}.com`]: null }
-            ),
-            networks: { test: null },
-            services: {
-                [`ca.${Org.name}.com`]: {
-                    image: "hyperledger/fabric-ca:$IMAGE_TAG",
-                    environment: [
-                        "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server",
-                        `FABRIC_CA_SERVER_CA_NAME=ca-${Org.name}`,
-                        "FABRIC_CA_SERVER_TLS_ENABLED=true",
-                        `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.${Org.name}.com-cert.pem`,
-                        "FABRIC_CA_SERVER_PORT=7054",
-                    ],
-                    ports: ["7054:7054"],
-                    command:
-                        "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
-                    volumes: [
-                        `../organizations/fabric-ca/${Org.name}:/etc/hyperledger/fabric-ca-server`,
-                    ],
-                    container_name: `ca_${Org.name}`,
-                    networks: ["test"],
+    let dckr = {
+        version: "2",
+        volumes: Object.assign(
+            {},
+            ...Org.peer.map((peer) => ({
+                [`${peer.name}.${Org.name}.com`]: null,
+            })),
+            { [`orderer.ord-${Org.name}.com`]: null }
+        ),
+        networks: { test: null },
+        services: {
+            [`ca.${Org.name}.com`]: {
+                image: "hyperledger/fabric-ca:1.4.7",
+                environment: [
+                    "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server",
+                    `FABRIC_CA_SERVER_CA_NAME=ca-${Org.name}`,
+                    "FABRIC_CA_SERVER_TLS_ENABLED=true",
+                    `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.${Org.name}.com-cert.pem`,
+                    "FABRIC_CA_SERVER_PORT=7054",
+                ],
+                ports: [`7054:${Org.ca.port}`],
+                command: "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
+                volumes: [
+                    `../organizations/fabric-ca/${Org.name}:/etc/hyperledger/fabric-ca-server`,
+                ],
+                container_name: `ca_${Org.name}`,
+                networks: ["test"],
+            },
+            [`orderer.ord-${Org.name}.com`]: {
+                extends: {
+                    file: "base/node-base.yaml",
+                    service: "orderer-base",
                 },
-                [`orderer.ord-${Org.name}.com`]: {
-                    extends: {
-                        file: "base/node-base.yaml",
-                        service: "orderer-base",
-                    },
-                    environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
-                    container_name: `orderer.ord-${Org.name}.com`,
-                    networks: ["test"],
-                    volumes: [
-                        "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
-                        `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
-                        `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
-                        `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
-                    ],
-                    ports: ["7050:7050"],
-                },
+                environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
+                container_name: `orderer.ord-${Org.name}.com`,
+                networks: ["test"],
+                volumes: [
+                    "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
+                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                    `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                ],
+                ports: [`7050:${Org.orderer.port}`],
             },
         },
+    };
+    Object.assign(
+        dckr.services,
         ...Org.peer.map((peer) => ({
             [`${peer.name}.${Org.name}.com`]: {
                 container_name: `${peer.name}.${Org.name}.com`,
@@ -156,237 +145,12 @@ function dckryamlgen(data, orgnumber) {
                     `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/tls:/etc/hyperledger/fabric/tls`,
                     `${peer.name}.${Org.name}.com:/var/hyperledger/production`,
                 ],
-                ports: ["7051:7051"],
+                ports: [`7051:${peer.port}`],
                 networks: ["test"],
             },
         }))
     );
     return YAML.safeDump(dckr);
-}
-function olddckryamlgen(data, orgnumber) {
-    let dckr;
-    dckr = '{"version": "2",'; // HEAD_{
-    dckr += '"volumes": {'; // volumes_{
-    for (var i = 0; i < data.org[orgnumber].peercount; i++) {
-        // peers
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com": null,';
-    }
-    dckr += '"orderer.ord-' + data.org[orgnumber].name + '.com": null'; // orderer
-    dckr += "},"; // volumes_}
-    dckr += '"networks": {"testnet": null},'; //networks
-    dckr += '"services": {'; // services_{
-    dckr += '"orderer.ord-' + data.org[orgnumber].name + '.com": {'; // orderer.ord_{
-
-    dckr +=
-        '"container_name": "orderer.ord-' + data.org[orgnumber].name + '.com",'; // container_name
-
-    dckr += '"extends": {'; // extends_{
-    dckr += '"file": "node-base.yaml",';
-    dckr += '"service": "orderer-base"},'; // extends_}
-
-    dckr += '"networks": ["testnet"],'; // networks
-
-    dckr +=
-        '"environment": ["ORDERER_GENERAL_LOCALMSPID=' +
-        data.org[orgnumber].name +
-        'OrdMSP"],'; //environment
-
-    dckr += '"volumes": ['; // volumes_{
-    dckr +=
-        '"./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",';
-    dckr +=
-        '"./crypto-config/ordererOrganizations/ord-' +
-        data.org[orgnumber].name +
-        ".com/orderers/orderer.ord-" +
-        data.org[orgnumber].name +
-        '.com/msp:/var/hyperledger/orderer/msp",';
-    dckr +=
-        '"./crypto-config/ordererOrganizations/ord-' +
-        data.org[orgnumber].name +
-        ".com/orderers/orderer.ord-" +
-        data.org[orgnumber].name +
-        '.com/tls/:/var/hyperledger/orderer/tls",';
-    dckr +=
-        '"orderer.ord-' +
-        data.org[orgnumber].name +
-        '.com:/var/hyperledger/production/orderer"],'; // volumes_}
-
-    dckr += '"ports": ["' + (port_num + i).toString() + '050:7050"]'; // ports
-
-    dckr += "},"; //orderer.ord_}
-
-    for (var i = 0; i < data.org[orgnumber].peercount; i++) {
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com": {'; // peer.org.com_{
-        dckr +=
-            '"container_name": "' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com",'; // container_name
-
-        dckr += '"extends": {'; // extends_{
-        dckr += '"file": "node-base.yaml",';
-        dckr += '"service": "peer-base"';
-        dckr += "},"; // extends_}
-
-        dckr += '"networks": ["testnet"],'; // networks
-
-        dckr += '"environment": ['; // environment_[
-        dckr +=
-            '"CORE_PEER_ID=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com",';
-        dckr +=
-            '"CORE_PEER_ADDRESS=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '051",';
-        dckr +=
-            '"CORE_PEER_LISTENADDRESS=0.0.0.0:' +
-            (port_num + orgnumber).toString() +
-            '051",';
-        dckr +=
-            '"CORE_PEER_CHAINCODEADDRESS=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '052",';
-        dckr +=
-            '"CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:' +
-            (port_num + orgnumber).toString() +
-            '052",';
-        dckr +=
-            '"CORE_PEER_GOSSIP_BOOTSTRAP=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '051",';
-        if (!i) {
-            dckr +=
-                '"CORE_PEER_GOSSIP_EXTERNALENDPOINT=' +
-                data.org[orgnumber].peer[i].name +
-                "." +
-                data.org[orgnumber].name +
-                ".com:" +
-                (port_num + orgnumber).toString() +
-                '051",';
-        }
-        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber].name + 'MSP",';
-        dckr +=
-            '"CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/' +
-            data.org[orgnumber].name +
-            ".com/users/Admin@" +
-            data.org[orgnumber].name +
-            '.com/msp"';
-        dckr += "],";
-
-        dckr += '"volumes": ['; // volumes_[
-        dckr += '"/var/run/:/host/var/run/",';
-        dckr +=
-            '"./crypto-config/peerOrganizations/' +
-            data.org[orgnumber].name +
-            ".com/peers/" +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com/msp:/etc/hyperledger/fabric/msp",';
-        dckr +=
-            '"./crypto-config/peerOrganizations/' +
-            data.org[orgnumber].name +
-            ".com/peers/" +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com/tls:/etc/hyperledger/fabric/tls",';
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com:/var/hyperledger/production"';
-        dckr += "],"; // volumes_]
-
-        dckr += '"ports": ["' + (peer_num++).toString() + '051:7051"]';
-        dckr += "},"; // peer.org.com_}
-    }
-
-    dckr += '"ca.' + data.org[orgnumber].name + '.com": {'; // ca_{
-    dckr += '"image": "hyperledger/fabric-ca:$IMAGE_TAG",';
-    dckr += '"dns_search": ".",';
-    dckr += '"environment": ['; // environment_[
-    dckr += '"GODEBUG=netdns=go",';
-    dckr +=
-        '"FABRIC_CA_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        '.com/ca",';
-    dckr += '"FABRIC_CA_SERVER_CA_NAME=ca-' + data.org[orgnumber].name + '",';
-    dckr += '"FABRIC_CA_SERVER_TLS_ENABLED=true",';
-    dckr +=
-        '"FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/ca." +
-        data.org[orgnumber].name +
-        '.com-cert.pem",';
-    dckr +=
-        '"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        '.com/ca/${testnet_ca0_PRIVATE_KEY}",';
-    dckr +=
-        '"FABRIC_CA_SERVER_PORT=' + (ca_num + orgnumber).toString() + '054"';
-    dckr += "],"; // environment_]
-
-    dckr += '"ports": ["' + (ca_num + orgnumber).toString() + '054:7054"],'; // ports
-
-    dckr +=
-        '"command": "sh -c \'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/ca." +
-        data.org[orgnumber].name +
-        ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" +
-        data.org[orgnumber].name +
-        ".com/ca/${testnet_ca_" +
-        data.org[orgnumber].name +
-        "_com_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
-
-    dckr += '"volumes": ['; // volumes_[
-    dckr +=
-        '"./crypto-config/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" +
-        data.org[orgnumber].name +
-        '.com/ca"';
-    dckr += "],"; // volumes_]
-
-    dckr += '"container_name": "ca_' + data.org[orgnumber].name + '",'; // container_name
-
-    dckr += '"networks": ["testnet"]'; // networks
-
-    dckr += "}"; // ca_}
-    dckr += "}"; // services_}
-    dckr += "}"; // HEAD_}
-
-    const dckrjson = JSON.parse(dckr);
-    const dckryaml = YAML.safeDump(dckrjson);
-    return dckryaml;
 }
 function configtxyamlgen(data) {
     let OrdererOrgs = data.org.map((org) => ({
@@ -558,13 +322,14 @@ async function process(id) {
 
         var network = { id: id, data: [] };
 
-        var extra_hosts = "    extra_hosts:\n";
+        var extra_hosts = "    extra_hosts:\n";       
         for (var i = 0; i < data.orgcount; i++) {
             var { networkid, PrivateIpAddress } = await aws.setupNetwork();
-            await network.data.push({
+            network.data.push({
                 Ip: PrivateIpAddress,
                 networkid: networkid,
             });
+            //network.data.push({})
             extra_hosts +=
                 '      - "' +
                 data.org[i].name +
@@ -572,7 +337,28 @@ async function process(id) {
                 network.data[i].Ip +
                 '"\n';
         }
-
+        //this is for mac
+        // let err,
+        //     dat,
+        //     stderr = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";cryptogen generate --config=./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config.yaml --output="./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config"'
+        //     );
+        // let err1,
+        //     dat1,
+        //     stderr1 = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";mkdir ./files/temp/' +
+        //             cryptodir +
+        //             "/channel-artifacts;configtxgen -configPath ./files/temp/" +
+        //             cryptodir +
+        //             "/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/" +
+        //             cryptodir +
+        //             "/channel-artifacts/genesis.block"
+        //     );
+        
         let err,
             dat,
             stderr = await cmdgetAsync(
@@ -593,9 +379,10 @@ async function process(id) {
                     cryptodir +
                     "/channel-artifacts/genesis.block"
             );
+        
         for (var i = 0; i < data.orgcount; i++) {
             var zip = new AdmZip();
-            await zip.addLocalFolder(
+            zip.addLocalFolder(
                 "files/temp/" +
                     cryptodir +
                     "/crypto-config/ordererOrganizations/ord-" +
@@ -605,7 +392,7 @@ async function process(id) {
                     data.org[i].name +
                     ".com"
             );
-            await zip.addLocalFolder(
+            zip.addLocalFolder(
                 "files/temp/" +
                     cryptodir +
                     "/crypto-config/peerOrganizations/" +
@@ -613,31 +400,28 @@ async function process(id) {
                     ".com",
                 "crypto-config/peerOrganizations/" + data.org[i].name + ".com"
             );
-            await zip.addLocalFolder(
+            zip.addLocalFolder(
                 "files/temp/" + cryptodir + "/channel-artifacts/",
                 "channel-artifacts/"
             );
-            await zip.addFile(
+            zip.addFile(
                 "docker-compose.yaml",
                 Buffer.alloc(dkyaml[i].length, dkyaml[i]),
                 ""
             );
-            // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
-            await zip.addFile(
+            zip.addFile(
                 "configtx.yaml",
                 Buffer.alloc(configtxyaml.length, configtxyaml),
                 ""
             );
-
-            const rndtmpname = await randomstring.generate(6);
-            await fs.copyFileSync(
+            fs.copyFileSync(
                 "files/node-base.yaml",
                 "files/temp/node-base.yaml"
             );
             await insertLine("files/temp/node-base.yaml")
                 .content(extra_hosts)
                 .at(26);
-            await zip.addLocalFile("files/temp/node-base.yaml");
+            zip.addLocalFile("files/temp/node-base.yaml");
 
             var ca_keys =
                 "export testnet_ca_" +
@@ -647,11 +431,15 @@ async function process(id) {
                 ".com/ca && ls *_sk)\n";
 
             const rnddownloadname = await randomstring.generate(64);
-            network.data[i].file = rnddownloadname + ".zip";
-            await fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
+            Object.assign(network.data[i], { file: rnddownloadname + ".zip" });
+            fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
-            await zip.addLocalFile("files/temp/start.sh");
-            await zip.writeZip("public/download/" + rnddownloadname + ".zip");
+            zip.addLocalFile("files/temp/start.sh");
+            zip.writeZip("public/download/" + rnddownloadname + ".zip");
+            //remove after 10 mins
+            setTimeout(() => {
+                fsExtra.remove("files/temp/" + cryptodir);
+            }, 1000 * 60 * 10);
         }
 
         for (var i = 0; i < data.orgcount; i++) {
@@ -682,6 +470,7 @@ async function process(id) {
         }
 
         for (var i = 0; i < data.orgcount; i++) {
+            //for local test
             network.data[i].InstanceId = await aws.launchInstanceOfNetwork(
                 network.data[i].networkid,
                 network.data[i].file
@@ -693,6 +482,7 @@ async function process(id) {
             for (var j = 0; j < data.org[i].peer.length; j++) {
                 ports.push(data.org[i].peer[j].port);
             }
+            //for local test
             axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
                 subdomain: data.org[i].name + "-" + id,
                 ports: ports,
@@ -752,9 +542,9 @@ async function process(id) {
         ]);
 
         await queryAsync("delete from pending where id=?", id);
-        res.send("Success");
+        return "Success";
     } else {
-        res.send("Illegal Request");
+        return "Illegal request";
     }
 }
 module.exports = { process };
