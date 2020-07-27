@@ -2,18 +2,19 @@ var express = require("express");
 var router = express.Router();
 var AdmZip = require("adm-zip");
 var randomstring = require("randomstring");
-var CronJob = require("cron").CronJob;
+//var CronJob = require("cron").CronJob;
 const fs = require("fs");
 const fsExtra = require("fs-extra");
-const YAML = require("json-to-pretty-yaml");
+const YAML = require("js-yaml");
 const insertLine = require("insert-line");
 const write = require("write");
 var cmd = require("node-cmd");
 const aws = require("./aws");
-const client_config = require("./client_config.js")
+const client_config = require("./client_config.js");
 const { promisify } = require("util");
-const axios = require('axios');
-const proxykey='hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP';
+const axios = require("axios");
+const proxykey =
+    "hi52MOxnCxJ1llf3krd2NKeqQFdXl0rouuKEzYx7NuKCu7dLyVGkTgqsQFrHtMuRmtvtydM9er57cQy65O1Tqr2fHF8cn5JlO4SsOglzfnlitXbNViWAP7kLOPJozM06Us5gRt2bqQiUYLZJPfPBAhWHRW7A1EJP";
 
 const mysql = require("mysql");
 const con = mysql.createConnection({
@@ -30,16 +31,6 @@ var dkyaml = [];
 var port_num = 7;
 var peer_num = 7;
 var ca_num = 7;
-
-var cleartemp = new CronJob(
-    "0 */10 * * * *",
-    function () {
-        fsExtra.emptyDir("files/temp");
-    },
-    null,
-    true
-);
-cleartemp.start();
 
 function cryptoyamlgen(data) {
     let crypto;
@@ -78,853 +69,237 @@ function cryptoyamlgen(data) {
     crypto = crypto + "]}";
     // console.log(crypto);
     const cryptojson = JSON.parse(crypto);
-    const cryptoyaml = YAML.stringify(cryptojson);
+    const cryptoyaml = YAML.safeDump(cryptojson);
     return cryptoyaml;
 }
-
 function dckryamlgen(data, orgnumber) {
-    let dckr;
-    dckr = '{"version": "2",'; // HEAD_{
-    dckr += '"volumes": {'; // volumes_{
-    for (var i = 0; i < data.org[orgnumber].peercount; i++) {
-        // peers
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com": null,';
-    }
-    dckr += '"orderer.ord-' + data.org[orgnumber].name + '.com": null'; // orderer
-    dckr += "},"; // volumes_}
-    dckr += '"networks": {"testnet": null},'; //networks
-    dckr += '"services": {'; // services_{
-    dckr += '"orderer.ord-' + data.org[orgnumber].name + '.com": {'; // orderer.ord_{
-
-    dckr +=
-        '"container_name": "orderer.ord-' + data.org[orgnumber].name + '.com",'; // container_name
-
-    dckr += '"extends": {'; // extends_{
-    dckr += '"file": "node-base.yaml",';
-    dckr += '"service": "orderer-base"},'; // extends_}
-
-    dckr += '"networks": ["testnet"],'; // networks
-
-    dckr +=
-        '"environment": ["ORDERER_GENERAL_LOCALMSPID=' +
-        data.org[orgnumber].name +
-        'OrdMSP"],'; //environment
-
-    dckr += '"volumes": ['; // volumes_{
-    dckr +=
-        '"./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",';
-    dckr +=
-        '"./crypto-config/ordererOrganizations/ord-' +
-        data.org[orgnumber].name +
-        ".com/orderers/orderer.ord-" +
-        data.org[orgnumber].name +
-        '.com/msp:/var/hyperledger/orderer/msp",';
-    dckr +=
-        '"./crypto-config/ordererOrganizations/ord-' +
-        data.org[orgnumber].name +
-        ".com/orderers/orderer.ord-" +
-        data.org[orgnumber].name +
-        '.com/tls/:/var/hyperledger/orderer/tls",';
-    dckr +=
-        '"orderer.ord-' +
-        data.org[orgnumber].name +
-        '.com:/var/hyperledger/production/orderer"],'; // volumes_}
-
-    dckr += '"ports": ["' + (port_num + i).toString() + '050:7050"]'; // ports
-
-    dckr += "},"; //orderer.ord_}
-
-    for (var i = 0; i < data.org[orgnumber].peercount; i++) {
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com": {'; // peer.org.com_{
-        dckr +=
-            '"container_name": "' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com",'; // container_name
-
-        dckr += '"extends": {'; // extends_{
-        dckr += '"file": "node-base.yaml",';
-        dckr += '"service": "peer-base"';
-        dckr += "},"; // extends_}
-
-        dckr += '"networks": ["testnet"],'; // networks
-
-        dckr += '"environment": ['; // environment_[
-        dckr +=
-            '"CORE_PEER_ID=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com",';
-        dckr +=
-            '"CORE_PEER_ADDRESS=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '051",';
-        dckr +=
-            '"CORE_PEER_LISTENADDRESS=0.0.0.0:' +
-            (port_num + orgnumber).toString() +
-            '051",';
-        dckr +=
-            '"CORE_PEER_CHAINCODEADDRESS=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '052",';
-        dckr +=
-            '"CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:' +
-            (port_num + orgnumber).toString() +
-            '052",';
-        dckr +=
-            '"CORE_PEER_GOSSIP_BOOTSTRAP=' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            ".com:" +
-            (port_num + orgnumber).toString() +
-            '051",';
-        if (!i) {
-            dckr +=
-                '"CORE_PEER_GOSSIP_EXTERNALENDPOINT=' +
-                data.org[orgnumber].peer[i].name +
-                "." +
-                data.org[orgnumber].name +
-                ".com:" +
-                (port_num + orgnumber).toString() +
-                '051",';
-        }
-        dckr += '"CORE_PEER_LOCALMSPID=' + data.org[orgnumber].name + 'MSP",';
-        dckr += '"CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/' + data.org[orgnumber].name + '.com/users/Admin@' + data.org[orgnumber].name +'.com/msp",';
-        dckr += "],";
-
-        dckr += '"volumes": ['; // volumes_[
-        dckr += '"/var/run/:/host/var/run/",';
-        dckr +=
-            '"./crypto-config/peerOrganizations/' +
-            data.org[orgnumber].name +
-            ".com/peers/" +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com/msp:/etc/hyperledger/fabric/msp",';
-        dckr +=
-            '"./crypto-config/peerOrganizations/' +
-            data.org[orgnumber].name +
-            ".com/peers/" +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com/tls:/etc/hyperledger/fabric/tls",';
-        dckr +=
-            '"' +
-            data.org[orgnumber].peer[i].name +
-            "." +
-            data.org[orgnumber].name +
-            '.com:/var/hyperledger/production"';
-        dckr += "],"; // volumes_]
-
-        dckr += '"ports": ["' + (peer_num++).toString() + '051:7051"]';
-        dckr += "},"; // peer.org.com_}
-    }
-
-    dckr += '"ca.' + data.org[orgnumber].name + '.com": {'; // ca_{
-    dckr += '"image": "hyperledger/fabric-ca:$IMAGE_TAG",';
-    dckr += '"dns_search": ".",';
-    dckr += '"environment": ['; // environment_[
-    dckr += '"GODEBUG=netdns=go",';
-    dckr +=
-        '"FABRIC_CA_HOME=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        '.com/ca",';
-    dckr += '"FABRIC_CA_SERVER_CA_NAME=ca-' + data.org[orgnumber].name + '",';
-    dckr += '"FABRIC_CA_SERVER_TLS_ENABLED=true",';
-    dckr +=
-        '"FABRIC_CA_SERVER_TLS_CERTFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/ca." +
-        data.org[orgnumber].name +
-        '.com-cert.pem",';
-    dckr +=
-        '"FABRIC_CA_SERVER_TLS_KEYFILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        '.com/ca/${testnet_ca0_PRIVATE_KEY}",';
-    dckr +=
-        '"FABRIC_CA_SERVER_PORT=' + (ca_num + orgnumber).toString() + '054"';
-    dckr += "],"; // environment_]
-
-    dckr += '"ports": ["' + (ca_num + orgnumber).toString() + '054:7054"],'; // ports
-
-    dckr +=
-        '"command": "sh -c \'fabric-ca-server start --ca.certfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/ca." +
-        data.org[orgnumber].name +
-        ".com-cert.pem --ca.keyfile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" +
-        data.org[orgnumber].name +
-        ".com/ca/${testnet_ca_" +
-        data.org[orgnumber].name +
-        "_com_PRIVATE_KEY} -b admin:adminpw -d'\","; // command
-
-    dckr += '"volumes": ['; // volumes_[
-    dckr +=
-        '"./crypto-config/peerOrganizations/' +
-        data.org[orgnumber].name +
-        ".com/ca/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/" +
-        data.org[orgnumber].name +
-        '.com/ca"';
-    dckr += "],"; // volumes_]
-
-    dckr += '"container_name": "ca_' + data.org[orgnumber].name + '",'; // container_name
-
-    dckr += '"networks": ["testnet"]'; // networks
-
-    dckr += "}"; // ca_}
-    dckr += "}"; // services_}
-    dckr += "}"; // HEAD_}
-
-    const dckrjson = JSON.parse(dckr);
-    const dckryaml = YAML.stringify(dckrjson);
-    return dckryaml;
+    let Org = data.org[orgnumber];
+    let dckr = {
+        version: "2",
+        volumes: Object.assign(
+            {},
+            ...Org.peer.map((peer) => ({
+                [`${peer.name}.${Org.name}.com`]: null,
+            })),
+            { [`orderer.ord-${Org.name}.com`]: null }
+        ),
+        networks: { test: null },
+        services: {
+            [`ca.${Org.name}.com`]: {
+                image: "hyperledger/fabric-ca:1.4.7",
+                environment: [
+                    "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server",
+                    `FABRIC_CA_SERVER_CA_NAME=ca-${Org.name}`,
+                    "FABRIC_CA_SERVER_TLS_ENABLED=true",
+                    `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.${Org.name}.com-cert.pem`,
+                    "FABRIC_CA_SERVER_PORT=7054",
+                ],
+                ports: [`7054:${Org.ca.port}`],
+                command: "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
+                volumes: [
+                    `../organizations/fabric-ca/${Org.name}:/etc/hyperledger/fabric-ca-server`,
+                ],
+                container_name: `ca_${Org.name}`,
+                networks: ["test"],
+            },
+            [`orderer.ord-${Org.name}.com`]: {
+                extends: {
+                    file: "base/node-base.yaml",
+                    service: "orderer-base",
+                },
+                environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
+                container_name: `orderer.ord-${Org.name}.com`,
+                networks: ["test"],
+                volumes: [
+                    "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
+                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                    `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                ],
+                ports: [`7050:${Org.orderer.port}`],
+            },
+        },
+    };
+    Object.assign(
+        dckr.services,
+        ...Org.peer.map((peer) => ({
+            [`${peer.name}.${Org.name}.com`]: {
+                container_name: `${peer.name}.${Org.name}.com`,
+                extends: {
+                    file: "base/node-base.yaml",
+                    service: "peer-base",
+                },
+                environment: [
+                    `CORE_PEER_ID=${peer.name}.${Org.name}.com`,
+                    `CORE_PEER_ADDRESS=${peer.name}.${Org.name}.com:7051`,
+                    `CORE_PEER_LISTENADDRESS=0.0.0.0:7051`,
+                    `CORE_PEER_CHAINCODEADDRESS=${peer.name}.${Org.name}.com:7052`,
+                    `CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052`,
+                    `CORE_PEER_GOSSIP_EXTERNALENDPOINT=${peer.name}.${Org.name}.com:7051`,
+                    `CORE_PEER_GOSSIP_BOOTSTRAP=${Org.peer[0].name}.${Org.name}.com:7051`,
+                    `CORE_PEER_LOCALMSPID=${Org.name}MSP`,
+                ],
+                volumes: [
+                    "/var/run/:/host/var/run",
+                    `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/msp:/etc/hyperledger/fabric/msp`,
+                    `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/tls:/etc/hyperledger/fabric/tls`,
+                    `${peer.name}.${Org.name}.com:/var/hyperledger/production`,
+                ],
+                ports: [`7051:${peer.port}`],
+                networks: ["test"],
+            },
+        }))
+    );
+    return YAML.safeDump(dckr);
 }
-
 function configtxyamlgen(data) {
-    let configtx;
-    configtx = "{"; //HEAD_{
-    configtx += '"Organizations":['; // Organizations_[
-    for (var i = 0; i < data.orgcount; i++) {
-        configtx += "{"; //Organizations_{
-        configtx += '"Name":"ord-' + data.org[i].name + '.com",'; //Name
-        configtx += '"ID":"ord-' + data.org[i].name + 'MSP",'; //ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins":{'; // Admin_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; //Admin_}
-
-        configtx += "}"; // Policies
-        configtx += "}"; // Organizations
-        configtx += ",";
-    }
-
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += '{"Name":"' + data.org[i].name + 'MSP",'; // Name
-        configtx += '"ID":"' + data.org[i].name + 'MSP",'; // ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.peer', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins": {'; // Admins_{
-        configtx += '"Type": "Signature",'; // Type
-        configtx += '"Rule": "OR(\'' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; // Admins
-
-        configtx += "},"; // Policies_}
-
-        configtx +=
-            '"AnchorPeers": [{"Host": "' +
-            data.org[i].peer[0].name +
-            "." +
-            data.org[i].name +
-            '.com","Port": 7051}]'; // AnchorPeers
-        configtx += "}";
-    }
-
-    configtx += "],"; // Organizations_]
-
-    /******************************************** Capabilities ********************************************/
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"Channel": {'; // Channel_{
-    configtx += '"V1_4_3": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_1": false';
-    configtx += "},"; // Channel_}
-    configtx += '"Orderer": {'; // Orderer_{
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_1": false';
-    configtx += "},"; // Orderer_}
-    configtx += '"Application": {'; // Application_{
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_2": false,';
-    configtx += '"V1_1": false';
-    configtx += "}"; // Application_}
-    configtx += "},"; // Capabilities_}
-
-    /******************************************** Application ********************************************/
-    configtx += '"Application": {'; // Application_{
-    configtx += '"Organizations": null,';
-    configtx += '"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_2": false,';
-    configtx += '"V1_1": false';
-    configtx += "}"; // Capabilities_}
-
-    configtx += "},"; // Application_}
-
-    /******************************************** Orderer ********************************************/
-    configtx += '"Orderer": {'; // Orderer_{
-    configtx += '"OrdererType": "etcdraft",'; // OrdererType
-
-    configtx += '"Addresses": ['; // Addressess_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += '"orderer.ord-' + data.org[i].name + '.com:7050"';
-    }
-    configtx += "],"; // Addressess_]
-
-    configtx += '"BatchTimeout": "2s",'; // BatchTimeout
-    configtx += '"BatchSize": {'; // BatchSize_{
-    configtx += '"MaxMessageCount": 10,';
-    configtx += '"AbsoluteMaxBytes": "99 MB",';
-    configtx += '"PreferredMaxBytes": "512 KB"';
-    configtx += "},"; // BatchSize_}
-
-    configtx += '"EtcdRaft": {'; // EtcRaft_{
-    configtx += '"Consenters": ['; // Consenters_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += "{";
-        configtx += '"Host": "orderer.ord-' + data.org[i].name + '.com",';
-        configtx += '"Port": 7050,';
-        configtx +=
-            '"ClientTLSCert": "crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            ".com/orderers/orderer.ord-" +
-            data.org[i].name +
-            '.com/tls/server.crt",';
-        configtx +=
-            '"ServerTLSCert": "crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            ".com/orderers/orderer.ord-" +
-            data.org[i].name +
-            '.com/tls/server.crt"';
-        configtx += "}";
-    }
-    configtx += "]"; // Consenters_]
-    configtx += "},"; // EtcRaft_}
-
-    configtx += '"Organizations": null,';
-    configtx += '"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "},"; // Admins_}
-
-    configtx += '"BlockValidation": {'; // BlockValidation_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "}"; // BlockValidation_}
-
-    configtx += "}"; // Policies_}
-
-    configtx += "},"; // Orderer_}
-
-    /******************************************** Channel ********************************************/
-    configtx += '"Channel": {'; // Channel_{
-    configtx += '"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_3": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_1": false';
-    configtx += "}"; // Capabilities_}
-
-    configtx += "},";
-
-    /******************************************** Profiles ********************************************/
-    configtx += '"Profiles": {'; // Profiles_{
-    configtx += '"testchannel": {'; // testchannel_{
-    configtx += '"Consortium": "TestConsortium",'; // Consortium
-
-    configtx += '"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_3": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_1": false';
-    configtx += "},"; // Capabilities_}
-
-    configtx += '"Application": {'; // Application_{
-    configtx += '"Organizations":['; // Organizations_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += '{"Name":"' + data.org[i].name + 'MSP",'; // Name
-        configtx += '"ID":"' + data.org[i].name + 'MSP",'; // ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.peer', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins": {'; // Admins_{
-        configtx += '"Type": "Signature",'; // Type
-        configtx += '"Rule": "OR(\'' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; // Admins
-
-        configtx += "},"; // Policies_}
-
-        configtx +=
-            '"AnchorPeers": [{"Host": "' +
-            data.org[i].peer[0].name +
-            "." +
-            data.org[i].name +
-            '.com","Port": 7051}]'; // AnchorPeers
-        configtx += "}";
-    }
-
-    configtx += "],"; // Organizations_]
-
-    configtx += '"Policies": {'; // Policies_{
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_2": false,';
-    configtx += '"V1_1": false';
-    configtx += "}"; // Capabilities_}
-
-    configtx += "}"; // Application_}
-    configtx += "},"; // testchannel_}
-
-    configtx += '"MultiNodeEtcdRaft": {'; // MultiNodeEtcdRaft_{
-
-    configtx += '"Policies": {'; // Policies_{
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_3": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_1": false';
-    configtx += "},"; // Capabilities_}
-
-    configtx += '"Orderer": {'; // Orderer_{
-
-    configtx += '"OrdererType": "etcdraft",'; // OrdererType
-
-    configtx += '"Addresses": ['; // Addressess_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += '"orderer.ord-' + data.org[i].name + '.com:7050"';
-    }
-    configtx += "],"; // Addressess_]
-
-    configtx += '"BatchTimeout": "2s",'; // BatchTimeout
-    configtx += '"BatchSize": {'; // BatchSize_{
-    configtx += '"MaxMessageCount": 10,';
-    configtx += '"AbsoluteMaxBytes": "99 MB",';
-    configtx += '"PreferredMaxBytes": "512 KB"';
-    configtx += "},"; // BatchSize_}
-
-    configtx += '"EtcdRaft": {'; // EtcRaft_{
-    configtx += '"Consenters": ['; // Consenters_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += "{";
-        configtx += '"Host": "orderer.ord-' + data.org[i].name + '.com",';
-        configtx += '"Port": 7050,';
-        configtx +=
-            '"ClientTLSCert": "crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            ".com/orderers/orderer.ord-" +
-            data.org[i].name +
-            '.com/tls/server.crt",';
-        configtx +=
-            '"ServerTLSCert": "crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            ".com/orderers/orderer.ord-" +
-            data.org[i].name +
-            '.com/tls/server.crt"';
-        configtx += "}";
-    }
-    configtx += "]"; // Consenters_]
-    configtx += "},"; // EtcRaft_}
-
-    configtx += '"Organizations":['; // Organizations_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += "{"; //Organizations_{
-        configtx += '"Name":"ord-' + data.org[i].name + '.com",'; //Name
-        configtx += '"ID":"ord-' + data.org[i].name + 'MSP",'; //ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins":{'; // Admin_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; //Admin_}
-
-        configtx += "}"; // Policies
-        configtx += "}"; // Organizations
-        //configtx += ",";
-    }
-    configtx += "],"; // Organizations_]
-
-    configtx += '"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "},"; // Admins_}
-
-    configtx += '"BlockValidation": {'; // BlockValidation_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "}"; // BlockValidation_}
-
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {';
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_1": false';
-    configtx += "}";
-
-    configtx += "},"; // Orderer_}
-
-    configtx += '"Application": {'; // Application_{
-    configtx += '"Organizations":['; // Organizations_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += "{"; //Organizations_{
-        configtx += '"Name":"ord-' + data.org[i].name + '.com",'; //Name
-        configtx += '"ID":"ord-' + data.org[i].name + 'MSP",'; //ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.member')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins":{'; // Admin_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx += '"Rule": "OR(\'ord-' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; //Admin_}
-
-        configtx += "}"; // Policies
-        configtx += "}"; // Organizations
-        //configtx += ",";
-    }
-    configtx += '],"Policies": {'; // Policies_{
-
-    configtx += '"Readers": {'; // Readers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Readers"'; // Rule
-    configtx += "},"; // Readers_}
-
-    configtx += '"Writers": {'; // Writers_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "ANY Writers"'; // Rule
-    configtx += "},"; // Writers_}
-
-    configtx += '"Admins": {'; // Admins_{
-    configtx += '"Type": "ImplicitMeta",'; // Type
-    configtx += '"Rule": "MAJORITY Admins"'; // Rule
-    configtx += "}"; // Admins_}
-
-    configtx += "},"; // Policies_}
-
-    configtx += '"Capabilities": {'; // Capabilities_{
-    configtx += '"V1_4_2": true,';
-    configtx += '"V1_3": false,';
-    configtx += '"V1_2": false,';
-    configtx += '"V1_1": false';
-    configtx += "}"; // Capabilities_}
-    configtx += "},"; //Application_}
-
-    configtx += '"Consortiums": {'; // Consortiums_{
-    configtx += '"TestConsortium": {'; // TestConsortium_{
-    configtx += '"Organizations":['; // Organizations_[
-    for (var i = 0; i < data.orgcount; i++) {
-        if (i) {
-            configtx += ",";
-        }
-        configtx += '{"Name":"' + data.org[i].name + 'MSP",'; // Name
-        configtx += '"ID":"' + data.org[i].name + 'MSP",'; // ID
-        configtx +=
-            '"MSPDir":"crypto-config/ordererOrganizations/ord-' +
-            data.org[i].name +
-            '.com/msp",'; // MSPDir
-        configtx += '"Policies":{'; // Policies_{
-
-        configtx += '"Readers":{'; // Readers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.peer', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Readers_}
-
-        configtx += '"Writers":{'; // Writers_{
-        configtx += '"Type":"Signature",'; // Type
-        configtx +=
-            '"Rule": "OR(\'' +
-            data.org[i].name +
-            "MSP.admin', '" +
-            data.org[i].name +
-            "MSP.client')\""; // Rule
-        configtx += "},"; // Writers_}
-
-        configtx += '"Admins": {'; // Admins_{
-        configtx += '"Type": "Signature",'; // Type
-        configtx += '"Rule": "OR(\'' + data.org[i].name + "MSP.admin')\""; // Rule
-        configtx += "}"; // Admins
-
-        configtx += "},"; // Policies_}
-
-        configtx +=
-            '"AnchorPeers": [{"Host": "' +
-            data.org[i].peer[0].name +
-            "." +
-            data.org[i].name +
-            '.com","Port": 7051}]'; // AnchorPeers
-        configtx += "}";
-    }
-
-    configtx += "]"; // Organizations_]
-    configtx += "}"; // TestConsortium_}
-    configtx += "}"; // Consortiums_}
-    configtx += "}"; // MultiNodeEtcdRaft_}
-    configtx += "}"; // Profiles_}
-    configtx += "}"; // HEAD_}
-    /******************************************** Finish configtx ********************************************/
-    //console.log(configtx);
-    const configtxjson = JSON.parse(configtx);
-    const configtxyaml = YAML.stringify(configtxjson);
-    return configtxyaml;
+    let OrdererOrgs = data.org.map((org) => ({
+        Name: `ord-${org.name}.com`,
+        ID: `ord-${org.name}MSP`,
+        MSPDir: `crypto-config/ordererOrganizations/ord-${org.name}.com/msp`,
+        Policies: {
+            Readers: {
+                Type: "Signature",
+                Rule: `OR(\'ord-${org.name}MSP.member\')`,
+            },
+            Writers: {
+                Type: "Signature",
+                Rule: `OR(\'ord-${org.name}MSP.member\')`,
+            },
+            Admins: {
+                Type: "Signature",
+                Rule: `OR(\'ord-${org.name}MSP.admin\')`,
+            },
+        },
+        OrdererEndpoints: [`ord-${org.name}.com:7050`],
+    }));
+    let Orgs = data.org.map((org) => ({
+        Name: `${org.name}MSP`,
+        ID: `${org.name}MSP`,
+        MSPDir: `crypto-config/peerOrganizations/${org.name}.com/msp`,
+        Policies: {
+            Readers: {
+                Type: "Signature",
+                Rule: `OR(\'${org.name}MSP.admin\',\'${org.name}MSP.peer\',\'${org.name}MSP.client\')`,
+            },
+            Writers: {
+                Type: "Signature",
+                Rule: `OR(\'${org.name}MSP.admin\',\'${org.name}MSP.client\')`,
+            },
+            Admins: {
+                Type: "Signature",
+                Rule: `OR(\'${org.name}MSP.admin\')`,
+            },
+            Endorsement: {
+                Type: "Signature",
+                Rule: `OR(\'${org.name}MSP.peer\')`,
+            },
+        },
+        AnchorPeers: [{ Host: `${org.name}.com`, Port: 7051 }],
+    }));
+    let Capabilities = {
+        Channel: { V2_0: true },
+        Orderer: { V2_0: true },
+        Application: { V2_0: true },
+    };
+    let ApplicationDefaults = {
+        Organizations: null,
+        Policies: {
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" },
+            LifecycleEndorsement: {
+                Type: "ImplicitMeta",
+                Rule: "MAJORITY Endorsement",
+            },
+            Endorsement: {
+                Type: "ImplicitMeta",
+                Rule: "MAJORITY Endorsement",
+            },
+        },
+        Capabilities: Capabilities.Application,
+    };
+    let OrdererDefaults = {
+        EtcdRaft: {
+            Consenters: data.org.map((org) => ({
+                Host: `ord-${org.name}.com`,
+                Port: 7050,
+                //TODO
+                //This path must be change when migrate to 2.1
+                ClientTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
+                ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
+            })),
+        },
+        BatchTimeout: "2s",
+        BatchSize: {
+            MaxMessageCount: 10,
+            AbsoluteMaxBytes: "99 MB",
+            PreferredMaxBytes: "512 KB",
+        },
+        Organizations: null,
+        Policies: {
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "MAJORITY Admins" },
+            BlockValidation: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+        },
+    };
+    let ChannelDefaults = {
+        Policies: {
+            Readers: { Type: "ImplicitMeta", Rule: "ANY Readers" },
+            Writers: { Type: "ImplicitMeta", Rule: "ANY Writers" },
+            Admins: { Type: "ImplicitMeta", Rule: "ANY Admins" },
+            //defaults to MAJORITY Admins
+            //But we want to sign only once for each org to join the channel
+            //May cause some security issue ?
+        },
+        Capabilities: Capabilities.Channel,
+    };
+    let SingleOrgChannelProfiles = Object.assign(
+        {},
+        ...data.org.map((org, i) => ({
+            //profile format
+            [`${org.name}OrgChannel`]: {
+                Consortium: "SampleConsortium",
+                ...ChannelDefaults,
+                Application: {
+                    ...ApplicationDefaults,
+                    Organizations: [Orgs[i]],
+                    Capabilities: Capabilities.Application,
+                },
+            },
+        }))
+    );
+    let configtx = {
+        Organizations: [...OrdererOrgs, ...Orgs],
+        Capabilities: Capabilities,
+        Application: ApplicationDefaults,
+        Orderer: OrdererDefaults,
+        Channel: ChannelDefaults,
+        Profiles: {
+            MultiNodeEtcdRaft: {
+                //system channel for genesis block generation
+                ...ChannelDefaults,
+                Orderer: {
+                    ...OrdererDefaults,
+                    Organizations: OrdererOrgs,
+                    Capabilities: Capabilities.Orderer,
+                },
+                Consortiums: {
+                    SampleConsortium: {
+                        Organizations: Orgs,
+                    },
+                },
+            },
+            ...SingleOrgChannelProfiles,
+        },
+    };
+    return YAML.safeDump(configtx);
 }
 
-async function process(id){
+async function process(id) {
     let err,
-        results = await queryAsync(
-            "select data from pending where id=?",
-            id
-        );
+        results = await queryAsync("select data from pending where id=?", id);
     if (results.length) {
         var data = results[0].data;
         data = await JSON.parse(data);
@@ -947,13 +322,14 @@ async function process(id){
 
         var network = { id: id, data: [] };
 
-        var extra_hosts = "    extra_hosts:\n";
+        var extra_hosts = "    extra_hosts:\n";       
         for (var i = 0; i < data.orgcount; i++) {
             var { networkid, PrivateIpAddress } = await aws.setupNetwork();
-            await network.data.push({
+            network.data.push({
                 Ip: PrivateIpAddress,
                 networkid: networkid,
             });
+            //network.data.push({})
             extra_hosts +=
                 '      - "' +
                 data.org[i].name +
@@ -961,7 +337,28 @@ async function process(id){
                 network.data[i].Ip +
                 '"\n';
         }
-
+        //this is for mac
+        // let err,
+        //     dat,
+        //     stderr = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";cryptogen generate --config=./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config.yaml --output="./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config"'
+        //     );
+        // let err1,
+        //     dat1,
+        //     stderr1 = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";mkdir ./files/temp/' +
+        //             cryptodir +
+        //             "/channel-artifacts;configtxgen -configPath ./files/temp/" +
+        //             cryptodir +
+        //             "/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/" +
+        //             cryptodir +
+        //             "/channel-artifacts/genesis.block"
+        //     );
+        
         let err,
             dat,
             stderr = await cmdgetAsync(
@@ -976,15 +373,16 @@ async function process(id){
             stderr1 = await cmdgetAsync(
                 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
                     cryptodir +
-                    '/channel-artifacts;configtxgen -configPath ./files/temp/' +
+                    "/channel-artifacts;configtxgen -configPath ./files/temp/" +
                     cryptodir +
-                    '/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
+                    "/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/" +
                     cryptodir +
-                    '/channel-artifacts/genesis.block'
+                    "/channel-artifacts/genesis.block"
             );
+        
         for (var i = 0; i < data.orgcount; i++) {
             var zip = new AdmZip();
-            await zip.addLocalFolder(
+            zip.addLocalFolder(
                 "files/temp/" +
                     cryptodir +
                     "/crypto-config/ordererOrganizations/ord-" +
@@ -994,7 +392,7 @@ async function process(id){
                     data.org[i].name +
                     ".com"
             );
-            await zip.addLocalFolder(
+            zip.addLocalFolder(
                 "files/temp/" +
                     cryptodir +
                     "/crypto-config/peerOrganizations/" +
@@ -1002,33 +400,28 @@ async function process(id){
                     ".com",
                 "crypto-config/peerOrganizations/" + data.org[i].name + ".com"
             );
-            await zip.addLocalFolder(
-                "files/temp/" +
-                    cryptodir +
-                    "/channel-artifacts/",
+            zip.addLocalFolder(
+                "files/temp/" + cryptodir + "/channel-artifacts/",
                 "channel-artifacts/"
             );
-            await zip.addFile(
+            zip.addFile(
                 "docker-compose.yaml",
                 Buffer.alloc(dkyaml[i].length, dkyaml[i]),
                 ""
             );
-            // zip.addFile("docker-compose.yaml", Buffer.alloc(dckryaml.length, dckryaml), "");
-            await zip.addFile(
+            zip.addFile(
                 "configtx.yaml",
                 Buffer.alloc(configtxyaml.length, configtxyaml),
                 ""
             );
-
-            const rndtmpname = await randomstring.generate(6);
-            await fs.copyFileSync(
+            fs.copyFileSync(
                 "files/node-base.yaml",
                 "files/temp/node-base.yaml"
             );
             await insertLine("files/temp/node-base.yaml")
                 .content(extra_hosts)
                 .at(26);
-            await zip.addLocalFile("files/temp/node-base.yaml");
+            zip.addLocalFile("files/temp/node-base.yaml");
 
             var ca_keys =
                 "export testnet_ca_" +
@@ -1038,11 +431,15 @@ async function process(id){
                 ".com/ca && ls *_sk)\n";
 
             const rnddownloadname = await randomstring.generate(64);
-            network.data[i].file = rnddownloadname + ".zip";
-            await fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
+            Object.assign(network.data[i], { file: rnddownloadname + ".zip" });
+            fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
-            await zip.addLocalFile("files/temp/start.sh");
-            await zip.writeZip("public/download/" + rnddownloadname + ".zip");
+            zip.addLocalFile("files/temp/start.sh");
+            zip.writeZip("public/download/" + rnddownloadname + ".zip");
+            //remove after 10 mins
+            setTimeout(() => {
+                fsExtra.remove("files/temp/" + cryptodir);
+            }, 1000 * 60 * 10);
         }
 
         for (var i = 0; i < data.orgcount; i++) {
@@ -1073,37 +470,69 @@ async function process(id){
         }
 
         for (var i = 0; i < data.orgcount; i++) {
+            //comment out for local test
             network.data[i].InstanceId = await aws.launchInstanceOfNetwork(
                 network.data[i].networkid,
                 network.data[i].file
             );
-            var ports=[];
+            var ports = [];
             ports.push(80);
             ports.push(data.org[i].orderer.port);
             ports.push(data.org[i].ca.port);
-            for(var j=0;j<data.org[i].peer.length;j++){
-              ports.push(data.org[i].peer[j].port);
+            for (var j = 0; j < data.org[i].peer.length; j++) {
+                ports.push(data.org[i].peer[j].port);
             }
-            axios.post('http://proxy.cathaybc-services.com/'+proxykey, {subdomain:data.org[i].name+'-'+id, ports:ports, ip:network.data[i].Ip});
-            network.data[i].name=data.org[i].name;
-            network.data[i].ports=ports;
+            //comment out for local test
+            axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
+                subdomain: data.org[i].name + "-" + id,
+                ports: ports,
+                ip: network.data[i].Ip,
+            });
+            network.data[i].name = data.org[i].name;
+            network.data[i].ports = ports;
             network.data[i].ccpfile = await randomstring.generate(64);
             client_config.ccpgen(
-              data.org[i],
-              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
-              "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
-              network.data[i].networkid,
-              "public/download",
-              network.data[i].ccpfile+'.ccp'
-            )
+                data.org[i],
+                "files/temp/" +
+                    cryptodir +
+                    "/crypto-config/peerOrganizations/" +
+                    data.org[i].name +
+                    ".com/tlsca/tlsca." +
+                    data.org[i].name +
+                    ".com-cert.pem",
+                "files/temp/" +
+                    cryptodir +
+                    "/crypto-config/ordererOrganizations/ord-" +
+                    data.org[i].name +
+                    ".com/tlsca/tlsca.ord-" +
+                    data.org[i].name +
+                    ".com-cert.pem",
+                network.data[i].networkid,
+                "public/download",
+                network.data[i].ccpfile + ".ccp"
+            );
             network.data[i].walletfile = await randomstring.generate(64);
             client_config.walletgen(
-              data.org[i],
-              "public/download",
-              network.data[i].walletfile,
-              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/priv_sk",
-              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem"
-            )
+                data.org[i],
+                "public/download",
+                network.data[i].walletfile,
+                "files/temp/" +
+                    cryptodir +
+                    "/crypto-config/peerOrganizations/" +
+                    data.org[i].name +
+                    ".com/users/Admin@" +
+                    data.org[i].name +
+                    ".com/msp/keystore/priv_sk",
+                "files/temp/" +
+                    cryptodir +
+                    "/crypto-config/peerOrganizations/" +
+                    data.org[i].name +
+                    ".com/users/Admin@" +
+                    data.org[i].name +
+                    ".com/msp/signcerts/Admin@" +
+                    data.org[i].name +
+                    ".com-cert.pem"
+            );
         }
 
         network = JSON.stringify(network);
@@ -1113,9 +542,9 @@ async function process(id){
         ]);
 
         await queryAsync("delete from pending where id=?", id);
-        res.send("Success");
+        return "Success";
     } else {
-        res.send("Illegal Request");
+        return "Illegal request";
     }
-};
-module.exports =  {process} ;
+}
+module.exports = { process };

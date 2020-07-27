@@ -70,10 +70,11 @@ app.post('/writekey', function(req, res, next){
   con.query('update users set pubkey=?, keyexists=1 where keyexists=0 && username=?', [req.body.pubkey, req.session.user]);
   res.redirect('/');
 })
-/*app.get('/asdfasdfasdf/:user', function(req, res, next){
-  req.session.user=req.params.user;
-  req.session.authorized='authorized';
-})*/
+// app.get('/a/:user', function(req, res, next){
+//   req.session.user=req.params.user;
+//   req.session.authorized='authorized';
+//   res.end();
+// })
 app.get('/logout', function(req, res, next){
   delete req.session.authorized;
   res.redirect('/');
