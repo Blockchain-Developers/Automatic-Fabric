@@ -1,7 +1,7 @@
-var express = require("express");
-var router = express.Router();
-var randomstring = require("randomstring");
-var passwordHash = require("password-hash");
+let express = require("express");
+let router = express.Router();
+let randomstring = require("randomstring");
+let passwordHash = require("password-hash");
 const mysql = require("mysql");
 const { promisify } = require("util");
 const con = mysql.createConnection({
@@ -14,10 +14,10 @@ const con = mysql.createConnection({
 const queryAsync = promisify(con.query).bind(con);
 /* GET home page. */
 
-router.get("/", function (req, res, next) {
+router.get("/", function (req, res) {
     res.render("admin");
 });
-router.post("/new", async function (req, res, next) {
+router.post("/new", async function (req, res) {
     const username = req.body.username;
     let password = await randomstring.generate(8);
     let hashedPassword = await passwordHash.generate(password);
@@ -26,6 +26,9 @@ router.post("/new", async function (req, res, next) {
             "select * from users where username=?",
             username
         );
+    if(err) {
+      console.log(err);
+    }
     if (!results.length) {
         await queryAsync(
             "insert into users set username=?, passwordhash=?, role=?, status=?",

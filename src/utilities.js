@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router();
+let express = require("express");
+let router = express.Router();
 const axios = require('axios');
 const openpgp = require('openpgp');
 const fs = require("fs");
@@ -14,19 +14,19 @@ const con = mysql.createConnection({
 
 
 async function startchannel(orgs=[], networkid, channelid){
-  console.log('mock start channel')
-  console.log(orgs)
-  console.log(networkid)
-  console.log(channelid)
-};
+  console.log('mock start channel');
+  console.log(orgs);
+  console.log(networkid);
+  console.log(channelid);
+}
 
 async function installchaincode(orgname, networkid, channelid, filename, ccname){
-  console.log('mock install chaincode')
-  console.log(orgname)
-  console.log(networkid)
-  console.log(channelid)
-  console.log(filename)
-  console.log(ccname)
+  console.log('mock install chaincode');
+  console.log(orgname);
+  console.log(networkid);
+  console.log(channelid);
+  console.log(filename);
+  console.log(ccname);
 }
 
 async function signcommand(command){

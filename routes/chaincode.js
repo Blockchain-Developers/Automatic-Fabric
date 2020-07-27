@@ -1,6 +1,6 @@
-var express = require("express");
-var router = express.Router();
-var randomstring = require("randomstring");
+let express = require("express");
+let router = express.Router();
+let randomstring = require("randomstring");
 const fileUpload = require('express-fileupload');
 const { promisify } = require("util");
 
@@ -21,6 +21,6 @@ router.get("/:id/new", async function (req, res, next) {
     res.render("chaincode-new", { id: req.params.id });
 });
 router.post("/", async function (req, res, next) {
-  req.files.chaincodefile.data
+  req.files.chaincodefile.data;
 });
 module.exports = router;

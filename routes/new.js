@@ -1,6 +1,6 @@
-var express = require("express");
-var router = express.Router();
-var randomstring = require("randomstring");
+let express = require("express");
+let router = express.Router();
+let randomstring = require("randomstring");
 const { promisify } = require("util");
 
 const mysql = require("mysql");
@@ -16,12 +16,12 @@ const queryAsync = promisify(con.query).bind(con);
 
 /* GET home page. */
 
-router.get("/", async function (req, res, next) {
+router.get("/", async function (req, res) {
     res.render("new", { user: req.session.user });
 });
-router.post("/", async function (req, res, next) {
-    var str = "";
-    for (var i = 0; i < req.body.fields.length; i++) {
+router.post("/", async function (req, res) {
+    let str = "";
+    for (let i = 0; i < req.body.fields.length; i++) {
         if (i != 0) {
             str += ", ";
         }
@@ -36,16 +36,19 @@ router.post("/", async function (req, res, next) {
                 ")",
             ["user"]
         );
+        if(err) {
+          console.log(err);
+        }
     if (results.length == req.body.fields.length) {
-        var data = {};
+        let data = {};
         data.orgcount = req.body.fields.length;
         data.org = [];
-        var id = await randomstring.generate({
+        let id = await randomstring.generate({
             length: 10,
             charset: "numeric",
         });
 
-        for (var i = 0; i < data.orgcount; i++) {
+        for (let i = 0; i < data.orgcount; i++) {
             data.org.push({});
             data.org[i].name = req.body.fields[i];
             let err,
@@ -53,7 +56,10 @@ router.post("/", async function (req, res, next) {
                     "select username, data from users where username=?",
                     req.body.fields[i]
                 );
-            var userdata = JSON.parse(results[0].data);
+                if(err) {
+                  console.log(err);
+                }
+            let userdata = JSON.parse(results[0].data);
             if (!userdata) {
                 userdata = {};
             }
@@ -63,13 +69,13 @@ router.post("/", async function (req, res, next) {
             } else {
                 userdata.pending.push({ id: id, filled: 0 });
             }
-            userdata_str = JSON.stringify(userdata);
+            const userdata_str = JSON.stringify(userdata);
             await queryAsync("update users set data=? where username=?", [
                 userdata_str,
                 results[0].username,
             ]);
         }
-        var data_str = JSON.stringify(data);
+        let data_str = JSON.stringify(data);
         await queryAsync("insert into pending set id=?, data=?", [
             id,
             data_str,
