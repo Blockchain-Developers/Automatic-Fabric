@@ -17,8 +17,8 @@ const queryAsync = promisify(con.query).bind(con);
 
 /* GET home page. */
 
-router.get("/", async function (req, res, next) {
-    res.render("new", { user: req.session.user });
+router.get("/:id/new", async function (req, res, next) {
+    res.render("chaincode-new", { id: req.params.id });
 });
 router.post("/", async function (req, res, next) {
   req.files.chaincodefile.data
