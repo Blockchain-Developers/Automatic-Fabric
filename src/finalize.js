@@ -366,7 +366,7 @@ async function process(id) {
   if (results.length) {
     let data = results[0].data;
     data = await JSON.parse(data);
-    for (var i = 0; i < data.orgcount; i++) {
+    for (let i = 0; i < data.orgcount; i++) {
       dkyaml[i] = await dckryamlgen(data, i);
       // dckryaml=await dckryamlgen(data);
     }
@@ -452,7 +452,7 @@ async function process(id) {
         '/channel-artifacts/genesis.block'
       );
 
-    for (i = 0; i < data.orgcount; i++) {
+    for (let i = 0; i < data.orgcount; i++) {
       const zip = new AdmZip();
       zip.addLocalFolder(
         'files/temp/' +
@@ -516,15 +516,18 @@ async function process(id) {
       }, 1000 * 60 * 10);
     }
 
-    for (i = 0; i < data.orgcount; i++) {
+    for (let i = 0; i < data.orgcount; i++) {
       let err,
         results = await queryAsync(
-          'select username, data from users where username=?',
+          'select username, data, pubkey from users where username=?',
           data.org[i].name
         );
+        if(err) {
+          console.log(err);
+        }
       let it = 0;
       let userdata = JSON.parse(results[0].data);
-      for (var j = 0; j < userdata.pending.length; j++) {
+      for (let j = 0; j < userdata.pending.length; j++) {
         if (userdata.pending[j].id == id) {
           it = j;
         }
@@ -543,17 +546,23 @@ async function process(id) {
       ]);
     }
 
-    for (i = 0; i < data.orgcount; i++) {
+    for (let i = 0; i < data.orgcount; i++) {
       // comment out for local test
+      let iddata = {};
+      iddata.org = data.org[i];
+      iddata.networkid = network.data[i].networkid;
+      iddata.location = data.org[i].name + '-' + id + '.cathaybc-services.com';
       network.data[i].InstanceId = await aws.launchInstanceOfNetwork(
         network.data[i].networkid,
-        network.data[i].file
+        network.data[i].file,
+        results[0].pubkey,
+        { getconnectionprofile : iddata }
       );
       const ports = [];
       ports.push(80);
       ports.push(data.org[i].orderer.port);
       ports.push(data.org[i].ca.port);
-      for (j = 0; j < data.org[i].peer.length; j++) {
+      for (let j = 0; j < data.org[i].peer.length; j++) {
         ports.push(data.org[i].peer[j].port);
       }
       // comment out for local test
@@ -564,49 +573,7 @@ async function process(id) {
       });
       network.data[i].name = data.org[i].name;
       network.data[i].ports = ports;
-      network.data[i].ccpfile = await randomstring.generate(64);
-      client_config.ccpgen(
-        data.org[i],
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/peerOrganizations/' +
-        data.org[i].name +
-        '.com/tlsca/tlsca.' +
-        data.org[i].name +
-        '.com-cert.pem',
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/ordererOrganizations/ord-' +
-        data.org[i].name +
-        '.com/tlsca/tlsca.ord-' +
-        data.org[i].name +
-        '.com-cert.pem',
-        network.data[i].networkid,
-        'public/download',
-        network.data[i].ccpfile + '.ccp'
-      );
-      network.data[i].walletfile = await randomstring.generate(64);
-      client_config.walletgen(
-        data.org[i],
-        'public/download',
-        network.data[i].walletfile,
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/peerOrganizations/' +
-        data.org[i].name +
-        '.com/users/Admin@' +
-        data.org[i].name +
-        '.com/msp/keystore/priv_sk',
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/peerOrganizations/' +
-        data.org[i].name +
-        '.com/users/Admin@' +
-        data.org[i].name +
-        '.com/msp/signcerts/Admin@' +
-        data.org[i].name +
-        '.com-cert.pem'
-      );
+
     }
 
     network = JSON.stringify(network);
