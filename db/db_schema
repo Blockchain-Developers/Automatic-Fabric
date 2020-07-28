@@ -1,0 +1,51 @@
+chaincode
++-----------+--------------+------+-----+---------------------+-------+
+| Field     | Type         | Null | Key | Default             | Extra |
++-----------+--------------+------+-----+---------------------+-------+
+| name      | varchar(100) | YES  |     | NULL                |       |
+| channelid | varchar(100) | YES  |     | NULL                |       |
+| filename  | varchar(100) | YES  |     | NULL                |       |
+| created   | timestamp    | NO   |     | current_timestamp() |       |
++-----------+--------------+------+-----+---------------------+-------+
+
+Channels
++---------+--------------+------+-----+---------------------+-------+
+| Field   | Type         | Null | Key | Default             | Extra |
++---------+--------------+------+-----+---------------------+-------+
+| id      | varchar(100) | YES  | UNI | NULL                |       |
+| network | varchar(100) | YES  |     | NULL                |       |
+| data    | text         | YES  |     | NULL                |       |
+| created | timestamp    | NO   |     | current_timestamp() |       |
+| status  | varchar(100) | YES  |     | NULL                |       |
++---------+--------------+------+-----+---------------------+-------+
+
+networks
++---------+--------------+------+-----+---------------------+-------+
+| Field   | Type         | Null | Key | Default             | Extra |
++---------+--------------+------+-----+---------------------+-------+
+| id      | varchar(100) | YES  | UNI | NULL                |       |
+| data    | text         | YES  |     | NULL                |       |
+| created | timestamp    | NO   |     | current_timestamp() |       |
++---------+--------------+------+-----+---------------------+-------+
+
+pending
++---------+--------------+------+-----+---------------------+-------+
+| Field   | Type         | Null | Key | Default             | Extra |
++---------+--------------+------+-----+---------------------+-------+
+| id      | varchar(100) | YES  | UNI | NULL                |       |
+| data    | text         | YES  |     | NULL                |       |
+| created | timestamp    | NO   |     | current_timestamp() |       |
++---------+--------------+------+-----+---------------------+-------+
+
+users
++--------------+--------------+------+-----+---------+-------+
+| Field        | Type         | Null | Key | Default | Extra |
++--------------+--------------+------+-----+---------+-------+
+| username     | varchar(100) | YES  | UNI | NULL    |       |
+| passwordhash | varchar(100) | YES  |     | NULL    |       |
+| role         | varchar(100) | YES  |     | NULL    |       |
+| status       | varchar(100) | YES  |     | NULL    |       |
+| data         | text         | YES  |     | NULL    |       |
+| keyexists    | tinyint(1)   | YES  |     | 0       |       |
+| pubkey       | text         | YES  |     | NULL    |       |
++--------------+--------------+------+-----+---------+-------+
