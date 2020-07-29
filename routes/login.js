@@ -11,7 +11,8 @@ const con = mysql.createConnection({
 });
 
 router.post('/', async function(req, res, next) {
-  con.query('select passwordhash, role from users where username=? and status=active', req.body.username, async function(err, results) {
+console.log(req.body.username)
+  con.query('select passwordhash, role from users where username=? and status="active"', req.body.username, async function(err, results) {
     if (results.length) {
       const check = await passwordHash.verify(req.body.password, results[0].passwordhash);
       // 'test' '1234567890' 'sha1$66dd990b$1$fda00d8554b530a5e7eaa3ca3defae9574d47ebd'
