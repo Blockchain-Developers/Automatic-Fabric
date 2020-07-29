@@ -1,10 +1,10 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
+let createError = require('http-errors');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
+let session = require('express-session');
+let MySQLStore = require('express-mysql-session')(session);
 const mysql = require('mysql');
 const con = mysql.createConnection({
   host: 'localhost',
@@ -14,9 +14,9 @@ const con = mysql.createConnection({
   multipleStatements: true
 });
 
-var sessionStore = new MySQLStore({}, con);
+let sessionStore = new MySQLStore({}, con);
 
-var app = express();
+let app = express();
 
 app.use(session(
 {
@@ -41,18 +41,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-var indexRouter = require('./routes/index');
-var newRouter = require('./routes/new');
-var fillRouter = require('./routes/fill');
-var editRouter = require('./routes/edit');
-var confirmRouter = require('./routes/confirm');
+let indexRouter = require('./routes/index');
+let newRouter = require('./routes/new');
+let fillRouter = require('./routes/fill');
+let editRouter = require('./routes/edit');
+let confirmRouter = require('./routes/confirm');
 //var finalizeRouter = require('./routes/finalize');
-var settingsRouter = require('./routes/settings');
-var adminRouter = require('./routes/admin');
-var connectionRouter = require('./routes/connection');
-var networkRouter = require('./routes/network');
-var channelRouter = require('./routes/channel');
-var chaincodeRouter = require('./routes/chaincode');
+let settingsRouter = require('./routes/settings');
+let adminRouter = require('./routes/admin');
+let connectionRouter = require('./routes/connection');
+let networkRouter = require('./routes/network');
+let channelRouter = require('./routes/channel');
+let chaincodeRouter = require('./routes/chaincode');
+let loginRouter = require('./routes/login');
 
 app.use('/', indexRouter);
 app.use('/new', newRouter);
@@ -66,10 +67,11 @@ app.use('/connection', connectionRouter);
 app.use('/network', networkRouter);
 app.use('/channel', channelRouter);
 app.use('/chaincode', chaincodeRouter);
+app.use('/login', loginRouter);
 app.post('/writekey', function(req, res, next){
   con.query('update users set pubkey=?, keyexists=1 where keyexists=0 && username=?', [req.body.pubkey, req.session.user]);
   res.redirect('/');
-})
+});
 // app.get('/a/:user', function(req, res, next){
 //   req.session.user=req.params.user;
 //   req.session.authorized='authorized';
