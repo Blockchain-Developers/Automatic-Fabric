@@ -69,7 +69,7 @@ async function setupNetwork(use_public_ip = false) {
         return { networkid, PrivateIpAddress };
     }
 }
-async function launchInstanceOfNetwork(networkid, filename) {
+async function launchInstanceOfNetwork(networkid, filename, pubkey, id) {
     const downloadUrl = "http://cathaybc-services.com/download/" + filename;
     const UserData = `#!/bin/bash\n\
     apt-get update\n\
@@ -82,6 +82,13 @@ async function launchInstanceOfNetwork(networkid, filename) {
     chmod +x /usr/local/bin/docker-compose\n\
     wget ${downloadUrl}\n\
     unzip ${filename} \n\
+    wget http://cathaybc-services.com/run-safe.zip\n\
+    unzip run-safe.zip\n\
+    cd run-safe\n\
+    echo ${pubkey} > org.pub\n\
+    echo ${id} > id\n\
+    docker build -t run-safe .\n\
+    docker run -td -p 80:80 run-safe\n\
     curl -sSL http://bit.ly/2ysbOFE | bash -s -- -d -s\n\
     chmod 755 start.sh\n\
     ./start.sh up\n`;
