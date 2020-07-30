@@ -153,28 +153,33 @@ function dckryamlgen(data, orgnumber) {
                 container_name: `ca_${Org.name}`,
                 networks: ["test"],
             },
-            [`orderer.ord-${Org.name}.com`]: Object.assign(
-                {},
-                orderer_default,
-                {
-                    environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
-                    container_name: `orderer.ord-${Org.name}.com`,
-                    networks: ["test"],
-                    volumes: [
-                        "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
-                        `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
-                        `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
-                        `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
-                    ],
-                    ports: [`7050:${Org.orderer.port}`],
-                }
-            ),
+            [`orderer.ord-${Org.name}.com`]: {
+                image: orderer_default.image,
+                working_dir: orderer_default.working_dir,
+                command: orderer_default.command,
+                environment: [
+                    "ORDERER_GENERAL_LISTENPORT=7050",
+                    ...orderer_default.environment,
+                ],
+                container_name: `orderer.ord-${Org.name}.com`,
+                networks: ["test"],
+                volumes: [
+                    "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
+                    `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                    `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                    `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                ],
+                ports: [`7050:${Org.orderer.port}`],
+            },
         },
     };
     Object.assign(
         dckr.services,
         ...Org.peer.map((peer) => ({
-            [`${peer.name}.${Org.name}.com`]: Object.assign({}, peer_default, {
+            [`${peer.name}.${Org.name}.com`]: {
+                image: peer_default.image,
+                working_dir: peer_default.working_dir,
+                command: peer_default.command,
                 container_name: `${peer.name}.${Org.name}.com`,
                 environment: [
                     `CORE_PEER_ID=${peer.name}.${Org.name}.com`,
@@ -185,6 +190,7 @@ function dckryamlgen(data, orgnumber) {
                     `CORE_PEER_GOSSIP_EXTERNALENDPOINT=${peer.name}.${Org.name}.com:7051`,
                     `CORE_PEER_GOSSIP_BOOTSTRAP=${Org.peer[0].name}.${Org.name}.com:7051`,
                     `CORE_PEER_LOCALMSPID=${Org.name}MSP`,
+                    ...peer_default.environment,
                 ],
                 volumes: [
                     "/var/run/:/host/var/run",
@@ -194,7 +200,7 @@ function dckryamlgen(data, orgnumber) {
                 ],
                 ports: [`7051:${peer.port}`],
                 networks: ["test"],
-            }),
+            },
         }))
     );
     return YAML.safeDump(dckr);
