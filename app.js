@@ -78,7 +78,7 @@ app.post('/writekey', function(req, res, next){
 //   res.end();
 // })
 app.get('/logout', function(req, res, next){
-  delete req.session.authorized;
+  delete req.session.user;
   res.redirect('/');
 });
 // catch 404 and forward to error handler
