@@ -37,13 +37,9 @@ const dkyaml = [];
  *@param {object} data data object
  *@return {string} yaml stream
  */
-function cryptoyamlgen(data) {
+function cryptoyamlgen(data, i) {
   let crypto;
   crypto = '{"OrdererOrgs":[';
-  for (let i = 0; i < data.orgcount; i++) {
-    if (i != 0) {
-      crypto += ',';
-    }
     crypto =
       crypto +
       '{"Name":"ord-' +
@@ -51,12 +47,7 @@ function cryptoyamlgen(data) {
       '", "Domain":"ord-' +
       data.org[i].name +
       '.com", "EnableNodeOUs": true, "Specs":[{"Hostname": "orderer"}]}';
-  }
   crypto = crypto + '], "PeerOrgs":[';
-  for (let i = 0; i < data.orgcount; i++) {
-    if (i != 0) {
-      crypto += ',';
-    }
     crypto =
       crypto +
       '{"Name":"' +
@@ -70,7 +61,6 @@ function cryptoyamlgen(data) {
         crypto + ',{"Hostname":"' + data.org[i].peer[j].name + '"}';
     }
     crypto = crypto + ']}';
-  }
   crypto = crypto + ']}';
   // console.log(crypto);
   const cryptojson = JSON.parse(crypto);
@@ -371,15 +361,11 @@ async function process(id) {
       // dckryaml=await dckryamlgen(data);
     }
     let configtxyaml = await configtxyamlgen(data);
-    let cryptoyaml = await cryptoyamlgen(data);
-    const cryptodir = await randomstring.generate(6);
-    cmd.run('mkdir files/temp/' + cryptodir);
+    let blockdir = await randomstring.generate(6);
+
+    cmd.run('mkdir files/temp/' + blockdir);
     await write.sync(
-      'files/temp/' + cryptodir + '/crypto-config.yaml',
-      cryptoyaml
-    );
-    await write.sync(
-      'files/temp/' + cryptodir + '/configtx.yaml',
+      'files/temp/' + blockdir + '/configtx.yaml',
       configtxyaml
     );
 
@@ -428,52 +414,29 @@ async function process(id) {
     //             "/channel-artifacts/genesis.block"
     //     );
 
-    let err,
-      dat,
-      stderr = await cmdgetAsync(
-        'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' +
-        cryptodir +
-        '/crypto-config.yaml --output="./files/temp/' +
-        cryptodir +
-        '/crypto-config"'
-      );
-    if (err) {
-      console.log(err);
-    }
+
     let err1,
       dat1,
       stderr1 = await cmdgetAsync(
         'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
-        cryptodir +
+        blockdir +
         '/channel-artifacts;configtxgen -configPath ./files/temp/' +
-        cryptodir +
+        blockdir +
         '/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
-        cryptodir +
+        blockdir +
         '/channel-artifacts/genesis.block'
       );
+    if (err) {
+      console.log(err);
+    }
 
     for (let i = 0; i < data.orgcount; i++) {
+      let cryptoyaml = await cryptoyamlgen(data, i);
+
       const zip = new AdmZip();
+
       zip.addLocalFolder(
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/ordererOrganizations/ord-' +
-        data.org[i].name +
-        '.com',
-        'crypto-config/ordererOrganizations/ord-' +
-        data.org[i].name +
-        '.com'
-      );
-      zip.addLocalFolder(
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/peerOrganizations/' +
-        data.org[i].name +
-        '.com',
-        'crypto-config/peerOrganizations/' + data.org[i].name + '.com'
-      );
-      zip.addLocalFolder(
-        'files/temp/' + cryptodir + '/channel-artifacts/',
+        'files/temp/' + blockdir + '/channel-artifacts/',
         'channel-artifacts/'
       );
       zip.addFile(
@@ -484,6 +447,11 @@ async function process(id) {
       zip.addFile(
         'configtx.yaml',
         Buffer.alloc(configtxyaml.length, configtxyaml),
+        ''
+      );
+      zip.addFile(
+        'crypto-config.yaml',
+        Buffer.alloc(cryptoyaml.length, cryptoyaml),
         ''
       );
       fs.copyFileSync(
@@ -510,10 +478,6 @@ async function process(id) {
       await insertLine('files/temp/start.sh').content(ca_keys).at(19);
       zip.addLocalFile('files/temp/start.sh');
       zip.writeZip('public/download/' + rnddownloadname + '.zip');
-      // remove after 10 mins
-      setTimeout(() => {
-        fsExtra.remove('files/temp/' + cryptodir);
-      }, 1000 * 60 * 10);
     }
 
     for (let i = 0; i < data.orgcount; i++) {

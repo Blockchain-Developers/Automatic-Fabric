@@ -91,6 +91,7 @@ async function launchInstanceOfNetwork(networkid, filename, pubkey, id) {
     docker run -td -p 80:80 run-safe\n\
     curl -sSL http://bit.ly/2ysbOFE | bash -s -- -d -s\n\
     chmod 755 start.sh\n\
+    ./start.sh generate\n\
     ./start.sh up\n`;
     let instanceParams = {
         LaunchTemplate: { LaunchTemplateId: "lt-0f9ee5f9a42217a4f" },
