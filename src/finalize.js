@@ -81,7 +81,7 @@ function cryptoyamlgen(data) {
  *@param {int} orgnumber number of orgs
  *@return {string} yaml stream
  */
-function dckryamlgen(data, orgnumber) {
+function dckryamlgen(data, orgnumber, extrahosts) {
     const Org = data.org[orgnumber];
     const peer_default = {
         image: "hyperledger/fabric-peer:2.1",
@@ -420,8 +420,22 @@ async function process(id) {
     if (results.length) {
         let data = results[0].data;
         data = await JSON.parse(data);
+        let extrahosts = [];
+        let network = {
+            id: id,
+            data: [],
+        };
         for (let i = 0; i < data.orgcount; i++) {
-            dkyaml[i] = await dckryamlgen(data, i);
+            const { networkid, PrivateIpAddress } = await aws.setupNetwork();
+            network.data.push({
+                Ip: PrivateIpAddress,
+                networkid: networkid,
+            });
+            extrahosts.push('"' + data.org[i].name + '.com:' +  network.data[i].Ip + '"');
+        }
+
+        for (let i = 0; i < data.orgcount; i++) {
+            dkyaml[i] = await dckryamlgen(data, i, extrahosts);
             // dckryaml=await dckryamlgen(data);
         }
         let configtxyaml = await configtxyamlgen(data);
@@ -437,26 +451,6 @@ async function process(id) {
             configtxyaml
         );
 
-        let network = {
-            id: id,
-            data: [],
-        };
-
-        let extra_hosts = "    extra_hosts:\n";
-        for (let i = 0; i < data.orgcount; i++) {
-            const { networkid, PrivateIpAddress } = await aws.setupNetwork();
-            network.data.push({
-                Ip: PrivateIpAddress,
-                networkid: networkid,
-            });
-            // network.data.push({})
-            extra_hosts +=
-                '      - "' +
-                data.org[i].name +
-                ".com:" +
-                network.data[i].Ip +
-                '"\n';
-        }
         // this is for mac
         // let err,
         //     dat,
