@@ -35,26 +35,17 @@ const dkyaml = [];
  *@param {object} data data object
  *@return {string} yaml stream
  */
-function cryptoyamlgen(data) {
-  let crypto;
-  crypto = '{"OrdererOrgs":[';
-  for (let i = 0; i < data.orgcount; i++) {
-    if (i != 0) {
-      crypto += ',';
-    }
+function cryptoyamlgen(data, i) {
+    let crypto;
+    crypto = '{"OrdererOrgs":[';
     crypto =
-      crypto +
-      '{"Name":"ord-' +
-      data.org[i].name +
-      '", "Domain":"ord-' +
-      data.org[i].name +
-      '.com", "EnableNodeOUs": true, "Specs":[{"Hostname": "orderer"}]}';
-  }
-  crypto = crypto + '], "PeerOrgs":[';
-  for (let i = 0; i < data.orgcount; i++) {
-    if (i != 0) {
-      crypto += ',';
-    }
+        crypto +
+        '{"Name":"ord-' +
+        data.org[i].name +
+        '", "Domain":"ord-' +
+        data.org[i].name +
+        '.com", "EnableNodeOUs": true, "Specs":[{"Hostname": "orderer"}]}';
+    crypto = crypto + '], "PeerOrgs":[';
     crypto =
         crypto +
         '{"Name":"' +
@@ -66,13 +57,12 @@ function cryptoyamlgen(data) {
     for (let j = 1; j < data.org[i].peercount; j++) {
         crypto = crypto + ',{"Hostname":"' + data.org[i].peer[j].name + '"}';
     }
-    crypto = crypto + ']}';
-  }
-  crypto = crypto + ']}';
-  // console.log(crypto);
-  const cryptojson = JSON.parse(crypto);
-  const cryptoyaml = YAML.safeDump(cryptojson);
-  return cryptoyaml;
+    crypto = crypto + "]}";
+    crypto = crypto + "]}";
+    // console.log(crypto);
+    const cryptojson = JSON.parse(crypto);
+    const cryptoyaml = YAML.safeDump(cryptojson);
+    return cryptoyaml;
 }
 /**
  *Generates generates docker-compose.yaml
@@ -376,18 +366,15 @@ async function process(id) {
     if (err) {
         console.log(err);
     }
-    let configtxyaml = await configtxyamlgen(data);
-    let cryptoyaml = await cryptoyamlgen(data);
-    const cryptodir = await randomstring.generate(6);
-    cmd.run('mkdir files/temp/' + cryptodir);
-    await write.sync(
-      'files/temp/' + cryptodir + '/crypto-config.yaml',
-      cryptoyaml
-    );
-    await write.sync(
-      'files/temp/' + cryptodir + '/configtx.yaml',
-      configtxyaml
-    );
+    if (results.length) {
+        let data = results[0].data;
+        data = await JSON.parse(data);
+        for (let i = 0; i < data.orgcount; i++) {
+            dkyaml[i] = await dckryamlgen(data, i);
+            // dckryaml=await dckryamlgen(data);
+        }
+        let configtxyaml = await configtxyamlgen(data);
+        let blockdir = await randomstring.generate(6);
 
         cmd.run("mkdir files/temp/" + blockdir);
         await write.sync(
@@ -400,72 +387,90 @@ async function process(id) {
             data: [],
         };
 
-    let err,
-      dat,
-      stderr = await cmdgetAsync(
-        'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' +
-        cryptodir +
-        '/crypto-config.yaml --output="./files/temp/' +
-        cryptodir +
-        '/crypto-config"'
-      );
-    if (err) {
-      console.log(err);
-    }
-    let err1,
-      dat1,
-      stderr1 = await cmdgetAsync(
-        'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
-        cryptodir +
-        '/channel-artifacts;configtxgen -configPath ./files/temp/' +
-        cryptodir +
-        '/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/' +
-        cryptodir +
-        '/channel-artifacts/genesis.block'
-      );
+        let extra_hosts = "    extra_hosts:\n";
+        for (let i = 0; i < data.orgcount; i++) {
+            const { networkid, PrivateIpAddress } = await aws.setupNetwork();
+            network.data.push({
+                Ip: PrivateIpAddress,
+                networkid: networkid,
+            });
+            // network.data.push({})
+            extra_hosts +=
+                '      - "' +
+                data.org[i].name +
+                ".com:" +
+                network.data[i].Ip +
+                '"\n';
+        }
+        // this is for mac
+        // let err,
+        //     dat,
+        //     stderr = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";cryptogen generate --config=./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config.yaml --output="./files/temp/' +
+        //             cryptodir +
+        //             '/crypto-config"'
+        //     );
+        // let err1,
+        //     dat1,
+        //     stderr1 = await cmdgetAsync(
+        //         'export PATH="$PATH:/Users/Mac/github/fabric-samples/bin";mkdir ./files/temp/' +
+        //             cryptodir +
+        //             "/channel-artifacts;configtxgen -configPath ./files/temp/" +
+        //             cryptodir +
+        //             "/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/" +
+        //             cryptodir +
+        //             "/channel-artifacts/genesis.block"
+        //     );
 
-    for (let i = 0; i < data.orgcount; i++) {
-      const zip = new AdmZip();
-      zip.addLocalFolder(
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/ordererOrganizations/ord-' +
-        data.org[i].name +
-        '.com',
-        'crypto-config/ordererOrganizations/ord-' +
-        data.org[i].name +
-        '.com'
-      );
-      zip.addLocalFolder(
-        'files/temp/' +
-        cryptodir +
-        '/crypto-config/peerOrganizations/' +
-        data.org[i].name +
-        '.com',
-        'crypto-config/peerOrganizations/' + data.org[i].name + '.com'
-      );
-      zip.addLocalFolder(
-        'files/temp/' + cryptodir + '/channel-artifacts/',
-        'channel-artifacts/'
-      );
-      zip.addFile(
-        'docker-compose.yaml',
-        Buffer.alloc(dkyaml[i].length, dkyaml[i]),
-        ''
-      );
-      zip.addFile(
-        'configtx.yaml',
-        Buffer.alloc(configtxyaml.length, configtxyaml),
-        ''
-      );
-      fs.copyFileSync(
-        'files/node-base.yaml',
-        'files/temp/node-base.yaml'
-      );
-      await insertLine('files/temp/node-base.yaml')
-        .content(extra_hosts)
-        .at(26);
-      zip.addLocalFile('files/temp/node-base.yaml');
+        let err1,
+            dat1,
+            stderr1 = await cmdgetAsync(
+                'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";mkdir ./files/temp/' +
+                    blockdir +
+                    "/channel-artifacts;configtxgen -configPath ./files/temp/" +
+                    blockdir +
+                    "/ -profile MultiNodeEtcdRaft -channelID system-channel -outputBlock ./files/temp/" +
+                    blockdir +
+                    "/channel-artifacts/genesis.block"
+            );
+        if (err) {
+            console.log(err);
+        }
+
+        for (let i = 0; i < data.orgcount; i++) {
+            let cryptoyaml = await cryptoyamlgen(data, i);
+
+            const zip = new AdmZip();
+
+            zip.addLocalFolder(
+                "files/temp/" + blockdir + "/channel-artifacts/",
+                "channel-artifacts/"
+            );
+            zip.addFile(
+                "docker-compose.yaml",
+                Buffer.alloc(dkyaml[i].length, dkyaml[i]),
+                ""
+            );
+            zip.addFile(
+                "configtx.yaml",
+                Buffer.alloc(configtxyaml.length, configtxyaml),
+                ""
+            );
+            zip.addFile(
+                "crypto-config.yaml",
+                Buffer.alloc(cryptoyaml.length, cryptoyaml),
+                ""
+            );
+            fs.copyFileSync(
+                "files/node-base.yaml",
+                "files/temp/node-base.yaml"
+            );
+            await insertLine("files/temp/node-base.yaml")
+                .content(extra_hosts)
+                .at(26);
+            zip.addLocalFile("files/temp/node-base.yaml");
 
             const ca_keys =
                 "export testnet_ca_" +
@@ -474,19 +479,15 @@ async function process(id) {
                 data.org[i].name +
                 ".com/ca && ls *_sk)\n";
 
-      const rnddownloadname = await randomstring.generate(64);
-      Object.assign(network.data[i], {
-        file: rnddownloadname + '.zip'
-      });
-      fs.copyFileSync('files/testnet.sh', 'files/temp/start.sh');
-      await insertLine('files/temp/start.sh').content(ca_keys).at(19);
-      zip.addLocalFile('files/temp/start.sh');
-      zip.writeZip('public/download/' + rnddownloadname + '.zip');
-      // remove after 10 mins
-      setTimeout(() => {
-        fsExtra.remove('files/temp/' + cryptodir);
-      }, 1000 * 60 * 10);
-    }
+            const rnddownloadname = await randomstring.generate(64);
+            Object.assign(network.data[i], {
+                file: rnddownloadname + ".zip",
+            });
+            fs.copyFileSync("files/testnet.sh", "files/temp/start.sh");
+            await insertLine("files/temp/start.sh").content(ca_keys).at(19);
+            zip.addLocalFile("files/temp/start.sh");
+            zip.writeZip("public/download/" + rnddownloadname + ".zip");
+        }
 
         for (let i = 0; i < data.orgcount; i++) {
             let err,
