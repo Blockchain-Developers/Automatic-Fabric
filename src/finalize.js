@@ -307,6 +307,13 @@ function configtxyamlgen(data) {
                 ClientTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
                 ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
             })),
+            Options: {
+              TickInterval: "500ms",
+              ElectionTick: 10,
+              HeartbeatTick: 1,
+              MaxInflightBlocks: 5,
+              SnapshotIntervalSize: 20971520,
+            },
         },
         BatchTimeout: "2s",
         BatchSize: {
