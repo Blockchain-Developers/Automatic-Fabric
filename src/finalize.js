@@ -400,7 +400,7 @@ async function process(id) {
             data: [],
         };
 
-    let err,
+    err,
       dat,
       stderr = await cmdgetAsync(
         'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";cryptogen generate --config=./files/temp/' +
