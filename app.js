@@ -55,6 +55,18 @@ let channelRouter = require('./routes/channel');
 let chaincodeRouter = require('./routes/chaincode');
 let loginRouter = require('./routes/login');
 
+<<<<<<< HEAD
+=======
+app.all("*", function (req, resp, next) {
+   if(!req.originalUrl=='/login'&&!req.session.user) {
+     res.redirect('/login');
+   }
+   else {
+     next();
+   }
+});
+
+>>>>>>> parent of 783f802... bug fix
 app.use('/', indexRouter);
 app.use('/new', newRouter);
 app.use('/fill', fillRouter);
