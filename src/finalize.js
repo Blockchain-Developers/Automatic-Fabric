@@ -121,6 +121,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
         ],
         working_dir: "/opt/gopath/src/github.com/hyperledger/fabric",
         command: "orderer",
+        extra_hosts: extrahosts,
     };
     const dckr = {
         version: "3",
@@ -171,6 +172,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                     `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
                 ],
                 ports: [`${Org.orderer.port}:7050`],
+                extra_hosts: orderer_default.extrahosts
             },
         },
     };
