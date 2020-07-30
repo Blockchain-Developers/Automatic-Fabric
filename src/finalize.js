@@ -172,7 +172,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                     `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
                 ],
                 ports: [`${Org.orderer.port}:7050`],
-                extra_hosts: orderer_default.extrahosts
+                extra_hosts: orderer_default.extra_hosts
             },
         },
     };
