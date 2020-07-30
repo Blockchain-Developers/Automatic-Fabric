@@ -434,12 +434,14 @@ async function process(id) {
             network.data.push({
                 Ip: PrivateIpAddress,
                 networkid: networkid,
-            });
+            });// DEBUG:
+            for(let j = 0; j < data.org[i].peer.length; j++) {
+              extrahosts.push(
+                  data.org[i].peer[j].name + '.' + data.org[i].name + ".com:" + network.data[i].Ip
+              );
+            }
             extrahosts.push(
-                data.org[i].name + ".com:" + network.data[i].Ip
-            );
-            extrahosts.push(
-                'ord-' + data.org[i].name + ".com:" + network.data[i].Ip
+                'orderer.ord-' + data.org[i].name + ".com:" + network.data[i].Ip
             );
         }
 
