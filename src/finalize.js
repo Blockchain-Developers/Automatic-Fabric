@@ -328,7 +328,6 @@ function configtxyamlgen(data) {
         ...ChannelDefaults,
         Orderer: {
           ...OrdererDefaults,
-          OrdererType: "etcdraft",
           Organizations: OrdererOrgs,
           Capabilities: Capabilities.Orderer,
         },
