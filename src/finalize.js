@@ -145,7 +145,7 @@ function dckryamlgen(data, orgnumber) {
                     `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server/ca.org1.${Org.name}.com-cert.pem`,
                     "FABRIC_CA_SERVER_PORT=7054",
                 ],
-                ports: [`7054:${Org.ca.port}`],
+                ports: [`${Org.ca.port}:7054`],
                 command: "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
                 volumes: [
                     `./crypto-config/peerOrganizations/${Org.name}/ca:/etc/hyperledger/fabric-ca-server`,
@@ -169,7 +169,7 @@ function dckryamlgen(data, orgnumber) {
                     `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
                     `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
                 ],
-                ports: [`7050:${Org.orderer.port}`],
+                ports: [`${Org.orderer.port}:7050`],
             },
         },
     };
@@ -198,7 +198,7 @@ function dckryamlgen(data, orgnumber) {
                     `./crypto-config/peerOrganizations/${Org.name}.com/peers/${peer.name}.${Org.name}.com/tls:/etc/hyperledger/fabric/tls`,
                     `${peer.name}.${Org.name}.com:/var/hyperledger/production`,
                 ],
-                ports: [`7051:${peer.port}`],
+                ports: [`${peer.port}:7051`],
                 networks: ["test"],
             },
         }))
