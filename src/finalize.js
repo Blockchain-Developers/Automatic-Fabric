@@ -83,8 +83,46 @@ function cryptoyamlgen(data) {
  */
 function dckryamlgen(data, orgnumber) {
     const Org = data.org[orgnumber];
+    const peer_default = {
+        image: "hyperledger/fabric-peer:2.1",
+        working_dir: "/opt/gopath/src/github.com/hyperledger/fabric/peer",
+        environment: [
+            "CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock",
+            "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_network",
+            "FABRIC_LOGGING_SPEC=INFO",
+            "CORE_PEER_TLS_ENABLED=true",
+            "CORE_PEER_GOSSIP_USELEADERELECTION=true",
+            "CORE_PEER_GOSSIP_ORGLEADER=false",
+            "CORE_PEER_PROFILE_ENABLED=true",
+            "CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt",
+            "CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key",
+            "CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt",
+            "CORE_CHAINCODE_EXECUTETIMEOUT=300s",
+        ],
+        command: "peer node start",
+    };
+    const orderer_default = {
+        image: "hyperledger/fabric-orderer:2.1",
+        environment: [
+            "FABRIC_LOGGING_SPEC=INFO",
+            "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0",
+            "ORDERER_GENERAL_BOOTSTRAPMETHOD=file",
+            "ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/orderer.genesis.block",
+            "ORDERER_GENERAL_LOCALMSPID=OrdererMSP",
+            "ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp",
+            "ORDERER_GENERAL_TLS_ENABLED=true",
+            "ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key",
+            "ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt",
+            "ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]",
+            "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt",
+            "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key",
+            "ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]",
+        ],
+        working_dir: "/opt/gopath/src/github.com/hyperledger/fabric",
+        command: "orderer",
+    };
     const dckr = {
-        version: "2",
+        version: "3",
         volumes: Object.assign(
             {},
             ...Org.peer.map((peer) => ({
@@ -104,44 +142,40 @@ function dckryamlgen(data, orgnumber) {
                     "FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server",
                     `FABRIC_CA_SERVER_CA_NAME=ca-${Org.name}`,
                     "FABRIC_CA_SERVER_TLS_ENABLED=true",
-                    `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.${Org.name}.com-cert.pem`,
+                    `FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server/ca.org1.${Org.name}.com-cert.pem`,
                     "FABRIC_CA_SERVER_PORT=7054",
                 ],
                 ports: [`7054:${Org.ca.port}`],
                 command: "sh -c 'fabric-ca-server start -b admin:adminpw -d'",
                 volumes: [
-                    `../organizations/fabric-ca/${Org.name}:/etc/hyperledger/fabric-ca-server`,
+                    `./crypto-config/peerOrganizations/${Org.name}/ca:/etc/hyperledger/fabric-ca-server`,
                 ],
                 container_name: `ca_${Org.name}`,
                 networks: ["test"],
             },
-            [`orderer.ord-${Org.name}.com`]: {
-                extends: {
-                    file: "./node-base.yaml",
-                    service: "orderer-base",
-                },
-                environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
-                container_name: `orderer.ord-${Org.name}.com`,
-                networks: ["test"],
-                volumes: [
-                    "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
-                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
-                    `./crypto-config/ordererOrganizations/example.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
-                    `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
-                ],
-                ports: [`7050:${Org.orderer.port}`],
-            },
+            [`orderer.ord-${Org.name}.com`]: Object.assign(
+                {},
+                orderer_default,
+                {
+                    environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
+                    container_name: `orderer.ord-${Org.name}.com`,
+                    networks: ["test"],
+                    volumes: [
+                        "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
+                        `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                        `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                        `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                    ],
+                    ports: [`7050:${Org.orderer.port}`],
+                }
+            ),
         },
     };
     Object.assign(
         dckr.services,
         ...Org.peer.map((peer) => ({
-            [`${peer.name}.${Org.name}.com`]: {
+            [`${peer.name}.${Org.name}.com`]: Object.assign({}, peer_default, {
                 container_name: `${peer.name}.${Org.name}.com`,
-                extends: {
-                    file: "./node-base.yaml",
-                    service: "peer-base",
-                },
                 environment: [
                     `CORE_PEER_ID=${peer.name}.${Org.name}.com`,
                     `CORE_PEER_ADDRESS=${peer.name}.${Org.name}.com:7051`,
@@ -160,7 +194,7 @@ function dckryamlgen(data, orgnumber) {
                 ],
                 ports: [`7051:${peer.port}`],
                 networks: ["test"],
-            },
+            }),
         }))
     );
     return YAML.safeDump(dckr);
