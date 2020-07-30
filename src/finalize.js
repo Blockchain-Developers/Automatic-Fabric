@@ -478,10 +478,6 @@ async function process(id) {
       await insertLine('files/temp/start.sh').content(ca_keys).at(19);
       zip.addLocalFile('files/temp/start.sh');
       zip.writeZip('public/download/' + rnddownloadname + '.zip');
-      // remove after 10 mins
-      setTimeout(() => {
-        fsExtra.remove('files/temp/' + cryptodir);
-      }, 1000 * 60 * 10);
     }
 
     for (let i = 0; i < data.orgcount; i++) {
