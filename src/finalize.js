@@ -434,7 +434,7 @@ async function process(id) {
                 networkid: networkid,
             });
             extrahosts.push(
-                data.org[i].name + ".com:" + network.data[i].Ip;
+                data.org[i].name + ".com:" + network.data[i].Ip
             );
         }
 
