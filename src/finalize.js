@@ -117,7 +117,7 @@ function dckryamlgen(data, orgnumber) {
             },
             [`orderer.ord-${Org.name}.com`]: {
                 extends: {
-                    file: "base/node-base.yaml",
+                    file: "./node-base.yaml",
                     service: "orderer-base",
                 },
                 environment: ["ORDERER_GENERAL_LISTENPORT=7050"],
@@ -139,7 +139,7 @@ function dckryamlgen(data, orgnumber) {
             [`${peer.name}.${Org.name}.com`]: {
                 container_name: `${peer.name}.${Org.name}.com`,
                 extends: {
-                    file: "base/node-base.yaml",
+                    file: "./node-base.yaml",
                     service: "peer-base",
                 },
                 environment: [
