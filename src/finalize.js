@@ -431,7 +431,7 @@ async function process(id) {
                 Ip: PrivateIpAddress,
                 networkid: networkid,
             });
-            extrahosts.push('"' + data.org[i].name + '.com:' +  network.data[i].Ip + '"');
+            extrahosts.push(data.org[i].name + '.com:' +  network.data[i].Ip);
         }
 
         for (let i = 0; i < data.orgcount; i++) {
