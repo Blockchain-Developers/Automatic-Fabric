@@ -438,6 +438,9 @@ async function process(id) {
             extrahosts.push(
                 data.org[i].name + ".com:" + network.data[i].Ip
             );
+            extrahosts.push(
+                'ord-' + data.org[i].name + ".com:" + network.data[i].Ip
+            );
         }
 
         for (let i = 0; i < data.orgcount; i++) {
