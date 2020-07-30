@@ -55,7 +55,7 @@ let channelRouter = require('./routes/channel');
 let chaincodeRouter = require('./routes/chaincode');
 let loginRouter = require('./routes/login');
 
-app.all("*", function (req, resp, next) {
+app.all("*", function (req, res, next) {
    if(!req.originalUrl=='/login'&&!req.session.user) {
      res.redirect('/login');
    }
