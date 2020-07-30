@@ -190,8 +190,8 @@ elif [ "${MODE}" == "teardown" ]; then ## Clear Network
   networkDown
 elif [ "${MODE}" == "stop" ]; then ## Stop Network
   networkDown
-elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-  generateCerts
+#elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
+  #generateCerts
   #generateChannelArtifacts
 elif [ "${MODE}" == "reboot" ]; then ## reboot the network
   networkDown
