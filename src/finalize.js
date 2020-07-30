@@ -524,14 +524,6 @@ async function process(id) {
                 Buffer.alloc(configtxyaml.length, configtxyaml),
                 ""
             );
-            fs.copyFileSync(
-                "files/node-base.yaml",
-                "files/temp/node-base.yaml"
-            );
-            await insertLine("files/temp/node-base.yaml")
-                .content(extra_hosts)
-                .at(26);
-            zip.addLocalFile("files/temp/node-base.yaml");
 
             const ca_keys =
                 "export testnet_ca_" +
