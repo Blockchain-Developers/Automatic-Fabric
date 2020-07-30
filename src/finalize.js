@@ -100,6 +100,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
             "CORE_CHAINCODE_EXECUTETIMEOUT=300s",
         ],
         command: "peer node start",
+        extra_hosts: extrahosts,
     };
     const orderer_default = {
         image: "hyperledger/fabric-orderer:2.1",
@@ -200,6 +201,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                 ],
                 ports: [`${peer.port}:7051`],
                 networks: ["test"],
+                extra_hosts: peer_default.extra_hosts,
             },
         }))
     );
@@ -308,11 +310,11 @@ function configtxyamlgen(data) {
                 ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
             })),
             Options: {
-              TickInterval: "500ms",
-              ElectionTick: 10,
-              HeartbeatTick: 1,
-              MaxInflightBlocks: 5,
-              SnapshotIntervalSize: 20971520,
+                TickInterval: "500ms",
+                ElectionTick: 10,
+                HeartbeatTick: 1,
+                MaxInflightBlocks: 5,
+                SnapshotIntervalSize: 20971520,
             },
         },
         BatchTimeout: "2s",
@@ -431,7 +433,9 @@ async function process(id) {
                 Ip: PrivateIpAddress,
                 networkid: networkid,
             });
-            extrahosts.push('"' + data.org[i].name + '.com:' +  network.data[i].Ip + '"');
+            extrahosts.push(
+                '"' + data.org[i].name + ".com:" + network.data[i].Ip + '"'
+            );
         }
 
         for (let i = 0; i < data.orgcount; i++) {
