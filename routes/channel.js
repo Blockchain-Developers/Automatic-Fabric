@@ -99,7 +99,11 @@ router.post("/:id/new", async function (req, res) {
     }
   }
   let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";';
-  command = 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
+  command += 'export CORE_PEER_LOCALMSPID="' + networkdata[initializer].name + 'MSP";';
+  command += 'export CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/' + networkdata[initializer].name + '.com/peers/' + networkdata[initializer].peers[0] + '.' + networkdata[initializer].name + '.com/tls/ca.crt;';
+  command += 'export CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/' + networkdata[initializer].name + '.com/users/Admin@' + networkdata[initializer].name + '.com/msp;';
+  command += 'export CORE_PEER_ADDRESS=' + networkdata[initializer].peers[0] + '.' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[2] + ';';
+  command += 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
   command += 'configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json;';
   for(let i=0; i<networkdata.length; i++) {
     if(i!=initializer) {
@@ -161,8 +165,16 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
           }
         }
         let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin;';
-        command = 'peer channel fetch 0 ' + req.params.channelid + '.block -o orderer.ord-' + networkdata[participant].name + '.com:' + networkdata[participant].ports[1] + ' -c ' + req.params.channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[participant].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[participant].name + '.com-cert.pem;';
-        command += 'peer channel join -b ' + req.params.channelid + '.block;';
+        command += 'export CORE_PEER_LOCALMSPID="' + networkdata[participant].name + 'MSP";';
+        command += 'export CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/' + networkdata[participant].name + '.com/peers/' + networkdata[participant].peers[0] + '.' + networkdata[participant].name + '.com/tls/ca.crt;';
+        command += 'export CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/' + networkdata[participant].name + '.com/users/Admin@' + networkdata[participant].name + '.com/msp;';
+        command += 'export CORE_PEER_ADDRESS=' + networkdata[participant].peers[0] + '.' + networkdata[participant].name + '.com:' + networkdata[participant].ports[2] + ';';
+        command += 'peer channel fetch 0 ' + req.params.channelid + '.block -o orderer.ord-' + networkdata[participant].name + '.com:' + networkdata[participant].ports[1] + ' -c ' + req.params.channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[participant].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[participant].name + '.com-cert.pem;';
+        for(let i=0;i<networkdata.peers.length;i++) {
+          command += 'export CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/' + networkdata[participant].name + '.com/peers/' + networkdata[participant].peers[i] + '.' + networkdata[participant].name + '.com/tls/ca.crt;';
+          command += 'export CORE_PEER_ADDRESS=' + networkdata[participant].peers[i] + '.' + networkdata[participant].name + '.com:' + networkdata[participant].ports[i+2] + ';';
+          command += 'peer channel join -b ' + req.params.channelid + '.block;';
+        }
         const serversig = await utilities.signcommand(command);
         const url = networkdata[participant].name + '-' + req.params.id + '.cathaybc-services.com';
         res.render('signing-portal', {command: command, serversig:serversig, url:url});

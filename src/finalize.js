@@ -629,12 +629,14 @@ async function process(id) {
                 results[0].pubkey,
                 { getconnectionprofile: iddata }
             );
-            const ports = [];
+            let ports = [];
+            let peers = [];
             ports.push(80);
             ports.push(data.org[i].orderer.port);
             ports.push(data.org[i].ca.port);
             for (let j = 0; j < data.org[i].peer.length; j++) {
                 ports.push(data.org[i].peer[j].port);
+                peers.push(data.org[i].peer[j].name);
             }
 
             network.data[i].ccpfile = await randomstring.generate(64);
