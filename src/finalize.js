@@ -647,11 +647,13 @@ async function process(id) {
               network.data[i].ccpfile+'.json'
             );
             network.data[i].walletfile = await randomstring.generate(64);
+            let privkeyfilename = (await fs.readdirSync("files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/"))[0];
             client_config.walletgen(
               data.org[i],
               "public/download",
               network.data[i].walletfile,
-              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem"
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem",
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/keystore/"+privkeyfilename
             );
             // comment out for local test
             axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
