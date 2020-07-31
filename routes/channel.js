@@ -115,48 +115,10 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
           if(data[i].participant==req.session.user){
             data[i].decision=1;
           }
-          if(data[i].decision){
-            cnt++;
-          }
-          if(data[i].decision==1){
-            orgs.push(data[i].participant);
-          }
         }
-        if(cnt==data.length){
-          utilities.startchannel(orgs, req.params.networkid, req.session.user);
-        }
-        data=JSON.stringify(data);
-        con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
-      });
-    }else if(req.params.what=='deny') {
-      let data={};
-      data=JSON.parse(results[0].data);
-      for(let i=0;i<data.pendingchannels.length;i++){
-        if(data.pendingchannels[i].id==req.params.channelid){
-          data.pendingchannels[i].decision=1;
-        }
-      }
-      data=JSON.stringify(data);
-      con.query('update users set data=? where username=?', [data, results[0].username]);
+        //render page to sign join channel command
 
-      con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
-        let data=JSON.parse(results[0].data);
-        let cnt=0;
-        let orgs=[];
-        for(let i=0;i<data.length;i++){
-          if(data[i].participant==req.session.user){
-            data[i].decision=2;
-          }
-          if(data[i].decision){
-            cnt++;
-          }
-          if(data[i].decision==1){
-            orgs.push(data[i].participant);
-          }
-        }
-        if(cnt==data.length){
-          utilities.startchannel(orgs, req.params.networkid, req.params.channelid);
-        }
+        //
         data=JSON.stringify(data);
         con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
       });

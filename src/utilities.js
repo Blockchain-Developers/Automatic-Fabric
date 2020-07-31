@@ -12,14 +12,6 @@ const con = mysql.createConnection({
     multipleStatements: true,
 });
 
-
-async function startchannel(orgs=[], networkid, channelid){
-  console.log('mock start channel');
-  console.log(orgs);
-  console.log(networkid);
-  console.log(channelid);
-}
-
 async function installchaincode(orgname, networkid, channelid, filename, ccname){
   console.log('mock install chaincode');
   console.log(orgname);

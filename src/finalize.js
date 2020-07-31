@@ -616,6 +616,23 @@ async function process(id) {
             for (let j = 0; j < data.org[i].peer.length; j++) {
                 ports.push(data.org[i].peer[j].port);
             }
+
+            network.data[i].ccpfile = await randomstring.generate(64);
+            client_config.ccpgen(
+              data.org[i],
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
+              "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
+              network.data[i].networkid,
+              "public/download",
+              network.data[i].ccpfile+'.json'
+            );
+            network.data[i].walletfile = await randomstring.generate(64);
+            client_config.walletgen(
+              data.org[i],
+              "public/download",
+              network.data[i].walletfile,
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem"
+            );
             // comment out for local test
             axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
                 subdomain: data.org[i].name + "-" + id,
