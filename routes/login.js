@@ -11,7 +11,7 @@ const con = mysql.createConnection({
 });
 
 router.post('/', async function(req, res, next) {
-console.log(req.body.username)
+console.log(req.body.username);
   con.query('select passwordhash, role from users where username=? and status="active"', req.body.username, async function(err, results) {
     if (results.length) {
       const check = await passwordHash.verify(req.body.password, results[0].passwordhash);
@@ -26,10 +26,10 @@ console.log(req.body.username)
         }
         res.redirect('/');
       } else {
-        res.redirect('/login');
+        res.redirect('/');
       }
     } else {
-      res.redirect('/login');
+      res.redirect('/');
     }
   });
 });
