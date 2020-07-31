@@ -44,9 +44,9 @@ function cryptoyamlgen(data) {
         }
         crypto =
             crypto +
-            '{"Name":"ord-' +
+            '{"Name":"' +
             data.org[i].name +
-            '", "Domain":"ord-' +
+            '", "Domain":"' +
             data.org[i].name +
             '.com", "EnableNodeOUs": true, "Specs":[{"Hostname": "orderer"}]}';
     }
@@ -131,7 +131,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                 [`${peer.name}.${Org.name}.com`]: null,
             })),
             {
-                [`orderer.ord-${Org.name}.com`]: null,
+                [`orderer.${Org.name}.com`]: null,
             }
         ),
         networks: {
@@ -155,7 +155,7 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                 container_name: `ca_${Org.name}`,
                 networks: ["test"],
             },
-            [`orderer.ord-${Org.name}.com`]: {
+            [`orderer.${Org.name}.com`]: {
                 image: orderer_default.image,
                 working_dir: orderer_default.working_dir,
                 command: orderer_default.command,
@@ -163,13 +163,13 @@ function dckryamlgen(data, orgnumber, extrahosts) {
                     "ORDERER_GENERAL_LISTENPORT=7050",
                     ...orderer_default.environment,
                 ],
-                container_name: `orderer.ord-${Org.name}.com`,
+                container_name: `orderer.${Org.name}.com`,
                 networks: ["test"],
                 volumes: [
                     "./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block",
-                    `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
-                    `./crypto-config/ordererOrganizations/ord-${Org.name}.com/orderers/orderer.ord-${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
-                    `orderer.ord-${Org.name}.com:/var/hyperledger/production/orderer`,
+                    `./crypto-config/ordererOrganizations/${Org.name}.com/orderers/orderer.${Org.name}.com/msp:/var/hyperledger/orderer/msp`,
+                    `./crypto-config/ordererOrganizations/${Org.name}.com/orderers/orderer.${Org.name}.com/tls/:/var/hyperledger/orderer/tls`,
+                    `orderer.${Org.name}.com:/var/hyperledger/production/orderer`,
                 ],
                 ports: [`${Org.orderer.port}:7050`],
                 extra_hosts: orderer_default.extra_hosts
@@ -216,24 +216,24 @@ function dckryamlgen(data, orgnumber, extrahosts) {
  */
 function configtxyamlgen(data) {
     const OrdererOrgs = data.org.map((org) => ({
-        Name: `ord-${org.name}.com`,
-        ID: `ord-${org.name}MSP`,
-        MSPDir: `crypto-config/ordererOrganizations/ord-${org.name}.com/msp`,
+        Name: `${org.name}.com`,
+        ID: `${org.name}MSP`,
+        MSPDir: `crypto-config/ordererOrganizations/${org.name}.com/msp`,
         Policies: {
             Readers: {
                 Type: "Signature",
-                Rule: `OR('ord-${org.name}MSP.member')`,
+                Rule: `OR('${org.name}MSP.member')`,
             },
             Writers: {
                 Type: "Signature",
-                Rule: `OR('ord-${org.name}MSP.member')`,
+                Rule: `OR('${org.name}MSP.member')`,
             },
             Admins: {
                 Type: "Signature",
-                Rule: `OR('ord-${org.name}MSP.admin')`,
+                Rule: `OR('${org.name}MSP.admin')`,
             },
         },
-        OrdererEndpoints: [`ord-${org.name}.com:7050`],
+        OrdererEndpoints: [`${org.name}.com:7050`],
     }));
     const Orgs = data.org.map((org) => ({
         Name: `${org.name}MSP`,
@@ -304,12 +304,12 @@ function configtxyamlgen(data) {
     const OrdererDefaults = {
         EtcdRaft: {
             Consenters: data.org.map((org) => ({
-                Host: `ord-${org.name}.com`,
+                Host: `orderer.${org.name}.com`,
                 Port: 7050,
                 // TODO
                 // This path must be change when migrate to 2.1
-                ClientTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
-                ServerTLSCert: `crypto-config/ordererOrganizations/ord-${org.name}.com/orderers/orderer.ord-${org.name}.com/tls/server.crt`,
+                ClientTLSCert: `crypto-config/ordererOrganizations/${org.name}.com/orderers/orderer.${org.name}.com/tls/server.crt`,
+                ServerTLSCert: `crypto-config/ordererOrganizations/${org.name}.com/orderers/orderer.${org.name}.com/tls/server.crt`,
             })),
             Options: {
                 TickInterval: "500ms",
@@ -394,7 +394,7 @@ function configtxyamlgen(data) {
                     ...OrdererDefaults,
                     OrdererType: "etcdraft",
                     Addresses: data.org.map(
-                        (org) => `ord-${org.name}.com:${org.orderer.port}`
+                        (org) => `${org.name}.com:${org.orderer.port}`
                     ),
                     Organizations: OrdererOrgs,
                     Capabilities: Capabilities.Orderer,
@@ -441,7 +441,7 @@ async function process(id) {
               );
             }
             extrahosts.push(
-                'orderer.ord-' + data.org[i].name + ".com:" + network.data[i].Ip
+                'orderer.' + data.org[i].name + ".com:" + network.data[i].Ip
             );
         }
 
@@ -513,10 +513,10 @@ async function process(id) {
             zip.addLocalFolder(
                 "files/temp/" +
                     cryptodir +
-                    "/crypto-config/ordererOrganizations/ord-" +
+                    "/crypto-config/ordererOrganizations/" +
                     data.org[i].name +
                     ".com",
-                "crypto-config/ordererOrganizations/ord-" +
+                "crypto-config/ordererOrganizations/" +
                     data.org[i].name +
                     ".com"
             );
