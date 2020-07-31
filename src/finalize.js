@@ -665,6 +665,7 @@ async function process(id) {
             });
             network.data[i].name = data.org[i].name;
             network.data[i].ports = ports;
+            network.data[i].peers = peers;
         }
 
         network = JSON.stringify(network);
