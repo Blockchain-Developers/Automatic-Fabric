@@ -2,6 +2,7 @@ let createError = require('http-errors');
 let express = require("express");
 let router = express.Router();
 let randomstring = require("randomstring");
+let inArray = require('in-array');
 const { promisify } = require("util");
 const utilities = require('../src/utilities');
 const mysql = require("mysql");
@@ -83,8 +84,7 @@ router.post("/:id/new", async function (req, res) {
       con.query('update users set data=? where username=?', [data, results[i].username]);
     }
   });
-  data=JSON.stringify(data);
-  con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending']);
+
   //res.redirect('/network/'+req.params.id);
   let err1,
       results1 = await queryAsync(
@@ -106,7 +106,7 @@ router.post("/:id/new", async function (req, res) {
   command += 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
   command += 'configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json;';
   for(let i=0; i<networkdata.length; i++) {
-    if(i!=initializer) {
+    if(i!=initializer&&inArray(participants, networkdata[i].name)) {
       command += 'jq -s \'.[0] * {"channel_group":{"groups":{"Application":{"groups": {"' + networkdata[i].name + 'MSP":.[1]}}}}}\' config.json ./' + networkdata[i].name + '.json > modified_config.json;';
     }
   }
@@ -119,7 +119,10 @@ router.post("/:id/new", async function (req, res) {
   command += 'peer channel signconfigtx -f update_in_envelope.pb;';
   command += 'peer channel update -f update_in_envelope.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
   const serversig = await utilities.signcommand(command);
+
   const url = networkdata[initializer].name + '-' + req.params.id + '.cathaybc-services.com';
+  data=JSON.stringify(data);
+  con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending']);
   res.render('signing-portal', {command: command, serversig:serversig, url:url});
 });
 router.get("/:networkid/:what/:channelid", async function (req, res) {
