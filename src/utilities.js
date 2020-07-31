@@ -24,7 +24,7 @@ async function installchaincode(orgname, networkid, channelid, filename, ccname)
 async function signcommand(command){
   const privateKeyArmored = fs.readFileSync('./server.key', 'utf8');
   const { keys: [privateKey] } = await openpgp.key.readArmored(privateKeyArmored);
-  await privateKey.decrypt('');
+  await privateKey.decrypt('1234567890');
   const { signature: detachedSignature } = await openpgp.sign({
     message: openpgp.cleartext.fromText(command),
     privateKeys: [privateKey],
