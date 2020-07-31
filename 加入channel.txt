@@ -1,0 +1,43 @@
+到configtx.yaml在的位置拿org3.json
+export FABRIC_CFG_PATH=$PWD
+../../bin/configtxgen -printOrg Org3MSP > ../organizations/peerOrganizations/org3.example.com/org3.json
+
+到已經在channel的peer裡面拿最新的block
+peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL_NAME --tls --cafile $ORDERER_CA
+
+把block decode回json
+configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+
+把config.json跟 org3.json合併
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"Org3MSP":.[1]}}}}}' config.json ./organizations/peerOrganizations/org3.example.com/org3.json > modified_config.json
+
+把原本的config.json變回pb
+configtxlator proto_encode --input config.json --type common.Config --output config.pb
+
+把新的modified_config.json變成pb
+configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+
+算delta值
+configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output org3_update.pb
+
+把計算完的pb換回json
+configtxlator proto_decode --input org3_update.pb --type common.ConfigUpdate | jq . > org3_update.json
+
+把header加回去
+echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_NAME'", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
+
+再把他轉回pb
+configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
+
+已經在channel裡的org的admin幫他簽（如果只有一個org的話不用做這步）
+peer channel signconfigtx -f org3_update_in_envelope.pb
+
+已經在channel裡的org的admin幫他update到channel裡（這步會自動sign然後再update)
+peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.example.com:7050 --tls --cafile $ORDERER_CA
+
+org3現在可以拿最新的block了
+peer channel fetch 0 mychannel.block -o orderer.example.com:7050 -c $CHANNEL_NAME --tls --cafile $ORDERER_CA
+
+
+org3加入channel
+peer channel join -b mychannel.block
