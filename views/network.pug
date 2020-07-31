@@ -13,7 +13,7 @@ head
       tbody
         tr
           td.text-center(style='width:160px;')
-            a.btn.btn-light(role='button' href='/channel/'+id+'/new' style='width:150px;margin-bottom:10px;') New Channel
+            a.btn.btn-light(role='button' href='/channel/'+id+'/new' target='_blank' style='width:150px;margin-bottom:10px;') New Channel
             a.btn.btn-light(role='button' href='/chaincode/'+id+'/new' style='width:150px;margin-bottom:10px;') New Chaincode
             a.btn.btn-light(role='button' href='/connection/'+id target='_blank' style='width:150px;margin-bottom:10px;') Connection
           td.text
@@ -31,7 +31,6 @@ head
                             td.text-left(width='50%') #{val.id}
                             td.text-center
                               a.btn.btn-primary(role='button' href='/channel/'+id+'/join/'+val.id style='width:90px'+(val.decision==0?'':';pointer-events: none;background-color:#EEEEEE;color:gray;color:gray')) Join
-                              a.btn.btn-danger(role='button' href='/channel/'+id+'/deny/'+val.id style='width:90px;margin-left:5px'+(val.decision==0?'':';pointer-events: none;background-color:#EEEEEE;color:gray')) Deny
                               a.btn.btn-dark(role='button' href='/channel/'+id+'/details/'+val.id style='width:90px;margin-left:5px') Details
                   tr
                     td.text-left

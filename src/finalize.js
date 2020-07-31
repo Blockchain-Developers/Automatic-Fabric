@@ -411,7 +411,7 @@ function configtxyamlgen(data) {
     return YAML.safeDump(configtx);
 }
 /**
- *Generates docker-compose.YAML
+ *Main Process Function
  *@param {string} id network id
  *@return {string} result
  */
@@ -507,6 +507,17 @@ async function process(id) {
                     cryptodir +
                     "/channel-artifacts/genesis.block"
             );
+        let definition = [];
+        for (let i = 0; i < data.orgcount; i++) {
+          let err2,
+              dat2,
+              stderr2 = await cmdgetAsync(
+                  'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";export FABRIC_CFG_PATH=files/temp/' + cryptodir + ';configtxgen -printOrg ' +
+                      data.org[i].name +
+                      'MSP'
+              );
+              definition.push(dat2);
+        }
 
         for (let i = 0; i < data.orgcount; i++) {
             const zip = new AdmZip();
@@ -532,6 +543,13 @@ async function process(id) {
                 "files/temp/" + cryptodir + "/channel-artifacts/",
                 "channel-artifacts/"
             );
+            for(let j=0; j< data.orgcount;j++) {
+              zip.addFile(
+                  data.org[j].name+".json",
+                  Buffer.alloc(definition[j].length, definition[j]),
+                  ""
+              );
+            }
             zip.addFile(
                 "docker-compose.yaml",
                 Buffer.alloc(dkyaml[i].length, dkyaml[i]),
@@ -558,6 +576,7 @@ async function process(id) {
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
             zip.addLocalFile("files/temp/start.sh");
             zip.writeZip("public/download/" + rnddownloadname + ".zip");
+
             // remove after 10 mins
             setTimeout(() => {
                 fsExtra.remove("files/temp/" + cryptodir);
@@ -601,6 +620,7 @@ async function process(id) {
             iddata.networkid = network.data[i].networkid;
             iddata.location =
                 data.org[i].name + "-" + id + ".cathaybc-services.com";
+            iddata = JSON.stringify(iddata);
             network.data[
                 i
             ].InstanceId = await aws.launchInstanceOfNetwork(
@@ -616,6 +636,23 @@ async function process(id) {
             for (let j = 0; j < data.org[i].peer.length; j++) {
                 ports.push(data.org[i].peer[j].port);
             }
+
+            network.data[i].ccpfile = await randomstring.generate(64);
+            client_config.ccpgen(
+              data.org[i],
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/tlsca/tlsca."+data.org[i].name+".com-cert.pem",
+              "files/temp/" + cryptodir + "/crypto-config/ordererOrganizations/ord-"+data.org[i].name+".com/tlsca/tlsca.ord-"+data.org[i].name+".com-cert.pem",
+              network.data[i].networkid,
+              "public/download",
+              network.data[i].ccpfile+'.json'
+            );
+            network.data[i].walletfile = await randomstring.generate(64);
+            client_config.walletgen(
+              data.org[i],
+              "public/download",
+              network.data[i].walletfile,
+              "files/temp/" + cryptodir + "/crypto-config/peerOrganizations/"+data.org[i].name+".com/users/Admin@"+data.org[i].name+".com/msp/signcerts/Admin@"+data.org[i].name+".com-cert.pem"
+            );
             // comment out for local test
             axios.post("http://proxy.cathaybc-services.com/" + proxykey, {
                 subdomain: data.org[i].name + "-" + id,
