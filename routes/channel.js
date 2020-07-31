@@ -120,7 +120,7 @@ router.post("/:id/new", async function (req, res) {
   command += 'peer channel update -f update_in_envelope.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
   const serversig = await utilities.signcommand(command);
 
-  const url = networkdata[initializer].name + '-' + req.params.id + '.cathaybc-services.com';
+  const url = 'http://' + networkdata[initializer].name + '-' + req.params.id + '.cathaybc-services.com';
   data=JSON.stringify(data);
   con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending']);
   res.render('signing-portal', {command: command, serversig:serversig, url:url});
@@ -179,7 +179,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
           command += 'peer channel join -b ' + req.params.channelid + '.block;';
         }
         const serversig = await utilities.signcommand(command);
-        const url = networkdata[participant].name + '-' + req.params.id + '.cathaybc-services.com';
+        const url = 'http://' + networkdata[participant].name + '-' + req.params.id + '.cathaybc-services.com';
         res.render('signing-portal', {command: command, serversig:serversig, url:url});
         ///////////////
         data=JSON.stringify(data);
