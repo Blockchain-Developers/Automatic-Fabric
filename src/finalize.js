@@ -304,7 +304,7 @@ function configtxyamlgen(data) {
     const OrdererDefaults = {
         EtcdRaft: {
             Consenters: data.org.map((org) => ({
-                Host: `ord-${org.name}.com`,
+                Host: `orderer.ord-${org.name}.com`,
                 Port: 7050,
                 // TODO
                 // This path must be change when migrate to 2.1
