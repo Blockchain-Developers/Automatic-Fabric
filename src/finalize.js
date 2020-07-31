@@ -516,7 +516,7 @@ async function process(id) {
                       data.org[i].name +
                       'MSP'
               );
-              definition.push(dat2);
+              definition.push(stderr2);
         }
 
         for (let i = 0; i < data.orgcount; i++) {
@@ -543,7 +543,7 @@ async function process(id) {
                 "files/temp/" + cryptodir + "/channel-artifacts/",
                 "channel-artifacts/"
             );
-            for(let j=0; j< data.orgcount;j++) {
+            for(let j=0; j< data.orgcount; j++) {
               zip.addFile(
                   data.org[j].name+".json",
                   Buffer.alloc(definition[j].length, definition[j]),

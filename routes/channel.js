@@ -98,7 +98,8 @@ router.post("/:id/new", async function (req, res) {
       initializer = i;
     }
   }
-  let command = 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
+  let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";';
+  command = 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
   command += 'configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json;';
   for(let i=0; i<networkdata.length; i++) {
     if(i!=initializer) {
@@ -159,7 +160,8 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
             participant = i;
           }
         }
-        let command = 'peer channel fetch 0 ' + req.params.channelid + '.block -o orderer.ord-' + networkdata[participant].name + '.com:' + networkdata[participant].ports[1] + ' -c ' + req.params.channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[participant].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[participant].name + '.com-cert.pem;';
+        let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin;';
+        command = 'peer channel fetch 0 ' + req.params.channelid + '.block -o orderer.ord-' + networkdata[participant].name + '.com:' + networkdata[participant].ports[1] + ' -c ' + req.params.channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[participant].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[participant].name + '.com-cert.pem;';
         command += 'peer channel join -b ' + req.params.channelid + '.block;';
         const serversig = await utilities.signcommand(command);
         const url = networkdata[participant].name + '-' + req.params.id + '.cathaybc-services.com';
