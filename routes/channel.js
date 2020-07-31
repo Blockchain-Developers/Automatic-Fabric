@@ -85,7 +85,37 @@ router.post("/:id/new", async function (req, res) {
   });
   data=JSON.stringify(data);
   con.query('insert into channels set id=?, network=?, data=?, status=?', [channelid, req.params.id, data, 'pending']);
-  res.redirect('/network/'+req.params.id);
+  //res.redirect('/network/'+req.params.id);
+  let err1,
+      results1 = await queryAsync(
+          "select data from networks where id=?",
+          [req.params.id]
+      );
+  let networkdata = (JSON.parse(results1)).data;
+  let initializer = 0;
+  for(let i=0; i<networkdata.length; i++) {
+    if(networkdata[i].name==req.session.user) {
+      initializer = i;
+    }
+  }
+  let command = 'peer channel fetch config config_block.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
+  command += 'configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json;';
+  for(let i=0; i<networkdata.length; i++) {
+    if(i!=initializer) {
+      command += 'jq -s \'.[0] * {"channel_group":{"groups":{"Application":{"groups": {"' + networkdata[i].name + 'MSP":.[1]}}}}}\' config.json ./' + networkdata[i].name + '.json > modified_config.json;';
+    }
+  }
+  command += 'configtxlator proto_encode --input config.json --type common.Config --output config.pb;';
+  command += 'configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb;';
+  command += 'configtxlator compute_update --channel_id ' + channelid + ' --original config.pb --updated modified_config.pb --output update.pb;';
+  command += 'configtxlator proto_decode --input update.pb --type common.ConfigUpdate | jq . > update.json;';
+  command += 'echo \'{"payload":{"header":{"channel_header":{"channel_id":"\'' + channelid + '\'", "type":2}},"data":{"config_update":\'$(cat update.json)\'}}}\' | jq . > update_in_envelope.json;';
+  command += 'configtxlator proto_encode --input update_in_envelope.json --type common.Envelope --output update_in_envelope.pb;';
+  command += 'peer channel signconfigtx -f update_in_envelope.pb;';
+  command += 'peer channel update -f update_in_envelope.pb -o orderer.ord-' + networkdata[initializer].name + '.com:' + networkdata[initializer].ports[1] + ' -c ' + channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[initializer].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[initializer].name + '.com-cert.pem;';
+  const serversig = await utilities.signcommand(command);
+  const url = networkdata[initializer].name + '-' + req.params.id + '.cathaybc-services.com';
+  res.render('signing-portal', {command: command, serversig:serversig, url:url});
 });
 router.get("/:networkid/:what/:channelid", async function (req, res) {
   let err, results = await queryAsync(
@@ -107,7 +137,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
       data=JSON.stringify(data);
       con.query('update users set data=? where username=?', [data, req.session.user]);
 
-      con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], function(err, results){
+      con.query('select data from channels where id=? and network=?', [req.params.channelid, req.params.networkid], async function(err, results){
         let data=JSON.parse(results[0].data);
         let cnt=0;
         let orgs=[];
@@ -117,8 +147,24 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
           }
         }
         //render page to sign join channel command
-
-        //
+        let err1,
+            results1 = await queryAsync(
+                "select data from networks where id=?",
+                [req.params.id]
+            );
+        let networkdata = (JSON.parse(results1)).data;
+        let participant = 0;
+        for(let i=0; i<networkdata.length; i++) {
+          if(networkdata[i].name==req.session.user) {
+            participant = i;
+          }
+        }
+        let command = 'peer channel fetch 0 ' + req.params.channelid + '.block -o orderer.ord-' + networkdata[participant].name + '.com:' + networkdata[participant].ports[1] + ' -c ' + req.params.channelid + ' --tls --cafile crypto-config/ordererOrganizations/ord-' + networkdata[participant].name + '.com/msp/tlscacerts/tlsca.ord-' + networkdata[participant].name + '.com-cert.pem;';
+        command += 'peer channel join -b ' + req.params.channelid + '.block;';
+        const serversig = await utilities.signcommand(command);
+        const url = networkdata[participant].name + '-' + req.params.id + '.cathaybc-services.com';
+        res.render('signing-portal', {command: command, serversig:serversig, url:url});
+        ///////////////
         data=JSON.stringify(data);
         con.query('update channels set data=? where id=? and network=?', [data, req.params.channelid, req.params.networkid]);
       });

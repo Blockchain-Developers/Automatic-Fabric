@@ -411,7 +411,7 @@ function configtxyamlgen(data) {
     return YAML.safeDump(configtx);
 }
 /**
- *Generates docker-compose.YAML
+ *Main Process Function
  *@param {string} id network id
  *@return {string} result
  */
@@ -507,6 +507,17 @@ async function process(id) {
                     cryptodir +
                     "/channel-artifacts/genesis.block"
             );
+        let definition = [];
+        for (let i = 0; i < data.orgcount; i++) {
+          let err2,
+              dat2,
+              stderr2 = await cmdgetAsync(
+                  'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";export FABRIC_CFG_PATH=files/temp/' + cryptodir + ';configtxgen -printOrg ' +
+                      data.org[i].name +
+                      'MSP'
+              );
+              definition.push(dat2);
+        }
 
         for (let i = 0; i < data.orgcount; i++) {
             const zip = new AdmZip();
@@ -532,6 +543,13 @@ async function process(id) {
                 "files/temp/" + cryptodir + "/channel-artifacts/",
                 "channel-artifacts/"
             );
+            for(let j=0; j< data.orgcount;j++) {
+              zip.addFile(
+                  data.org[j].name+".json",
+                  Buffer.alloc(definition[j].length, definition[j]),
+                  ""
+              );
+            }
             zip.addFile(
                 "docker-compose.yaml",
                 Buffer.alloc(dkyaml[i].length, dkyaml[i]),
@@ -558,6 +576,7 @@ async function process(id) {
             await insertLine("files/temp/start.sh").content(ca_keys).at(19);
             zip.addLocalFile("files/temp/start.sh");
             zip.writeZip("public/download/" + rnddownloadname + ".zip");
+
             // remove after 10 mins
             setTimeout(() => {
                 fsExtra.remove("files/temp/" + cryptodir);
@@ -601,6 +620,7 @@ async function process(id) {
             iddata.networkid = network.data[i].networkid;
             iddata.location =
                 data.org[i].name + "-" + id + ".cathaybc-services.com";
+            iddata = JSON.stringify(iddata);
             network.data[
                 i
             ].InstanceId = await aws.launchInstanceOfNetwork(
