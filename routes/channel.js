@@ -91,7 +91,7 @@ router.post("/:id/new", async function (req, res) {
           "select data from networks where id=?",
           [req.params.id]
       );
-  let networkdata = (JSON.parse(results1)).data;
+  let networkdata = results1.data;
   let initializer = 0;
   for(let i=0; i<networkdata.length; i++) {
     if(networkdata[i].name==req.session.user) {
@@ -160,7 +160,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
                 "select data from networks where id=?",
                 [req.params.id]
             );
-        let networkdata = (JSON.parse(results1)).data;
+        let networkdata = results1.data;
         let participant = 0;
         for(let i=0; i<networkdata.length; i++) {
           if(networkdata[i].name==req.session.user) {
