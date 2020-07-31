@@ -32,7 +32,7 @@ router.post("/new", async function (req, res) {
     if (!results.length) {
         await queryAsync(
             "insert into users set username=?, passwordhash=?, role=?, status=?",
-            [username, hashedPassword, "User", "Active"]
+            [username, hashedPassword, "user", "Active"]
         );
         res.render("user-created", { password: password });
     } else {
