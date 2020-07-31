@@ -32,4 +32,4 @@ async function signcommand(command){
   return detachedSignature;
 }
 
-module.exports =  {startchannel, installchaincode, signcommand} ;
+module.exports =  {installchaincode, signcommand} ;
