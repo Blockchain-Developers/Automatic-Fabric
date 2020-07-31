@@ -615,6 +615,14 @@ async function process(id) {
 
         for (let i = 0; i < data.orgcount; i++) {
             // comment out for local test
+            let err,
+                results = await queryAsync(
+                    "select username, data, pubkey from users where username=?",
+                    data.org[i].name
+                );
+            if (err) {
+                console.log(err);
+            }
             let iddata = {};
             iddata.org = data.org[i];
             iddata.networkid = network.data[i].networkid;
