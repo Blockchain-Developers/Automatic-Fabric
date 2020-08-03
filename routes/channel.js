@@ -98,7 +98,7 @@ router.post("/:id/new", async function (req, res) {
       initializer = i;
     }
   }
-  let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin";';
+  let command = 'export PATH="$PATH:./bin";';
   command += 'export CORE_PEER_LOCALMSPID="' + networkdata[initializer].name + 'MSP";';
   command += 'export CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/' + networkdata[initializer].name + '.com/peers/' + networkdata[initializer].peers[0] + '.' + networkdata[initializer].name + '.com/tls/ca.crt;';
   command += 'export CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/' + networkdata[initializer].name + '.com/users/Admin@' + networkdata[initializer].name + '.com/msp;';
@@ -167,7 +167,7 @@ router.get("/:networkid/:what/:channelid", async function (req, res) {
             participant = i;
           }
         }
-        let command = 'export PATH="$PATH:/opt/gopath/src/github.com/hyperledger/fabric/bin;';
+        let command = 'export PATH="$PATH:./bin;';
         command += 'export CORE_PEER_LOCALMSPID="' + networkdata[participant].name + 'MSP";';
         command += 'export CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/' + networkdata[participant].name + '.com/peers/' + networkdata[participant].peers[0] + '.' + networkdata[participant].name + '.com/tls/ca.crt;';
         command += 'export CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/' + networkdata[participant].name + '.com/users/Admin@' + networkdata[participant].name + '.com/msp;';
