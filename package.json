@@ -7,7 +7,7 @@
     "debug": "node ./bin/www -e DEBUG=true"
   },
   "dependencies": {
-    "adm-zip": "^0.4.14",
+    "adm-zip": "^0.5.3",
     "aws-sdk": "^2.686.0",
     "axios": "^0.19.2",
     "blob": "^0.1.0",
