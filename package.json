@@ -23,7 +23,7 @@
     "http-errors": "~1.8.0",
     "in-array": "^0.1.2",
     "insert-line": "^1.1.0",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.1.0",
     "morgan": "~1.10.0",
     "mysql": "^2.18.1",
     "node-cmd": "^3.0.0",
